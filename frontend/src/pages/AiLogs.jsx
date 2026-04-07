@@ -107,9 +107,12 @@ const AiLogs = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <span className="font-bold text-sm text-main truncate">
-                        {log.review?.title || 'Direct Review'}
+                        {log.review?.title || (log.isTemporary ? 'Quick Analysis' : 'Direct Review')}
                       </span>
                       <span className="text-[10px] bg-primary-500/10 px-2 py-0.5 rounded text-primary-600 font-bold uppercase shrink-0 border border-primary-500/20 tracking-wider font-mono">{log.language}</span>
+                      {log.isTemporary && (
+                        <span className="text-[10px] bg-amber-500/10 px-2 py-0.5 rounded text-amber-600 font-bold uppercase shrink-0 border border-amber-500/20 tracking-wider">Quick Session</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-[10px] text-sec font-bold uppercase tracking-wider shrink-0">

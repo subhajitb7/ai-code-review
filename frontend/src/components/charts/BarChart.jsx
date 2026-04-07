@@ -47,7 +47,7 @@ const BarChart = ({ data }) => {
   };
 
   return (
-    <div className="w-full h-full min-h-[300px]">
+    <div className="w-full h-80">
       <ResponsiveContainer width="100%" height="100%">
         <ReBarChart
           layout="vertical"

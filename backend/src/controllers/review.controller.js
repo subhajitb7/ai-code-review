@@ -80,6 +80,7 @@ export const analyzeCode = async (req, res) => {
     
     const aiFeedback = data.choices[0]?.message?.content || 'No feedback generated.';
     const tokensUsed = data.usage?.total_tokens || 0;
+    const saveToHistory = req.body.saveToHistory !== false;
 
     let bugsFound = 0;
     const bugMatch = aiFeedback.match(/(\d+)\s*(?:bug|issue|error|vulnerability)/i);
@@ -89,19 +90,48 @@ export const analyzeCode = async (req, res) => {
       bugsFound = 1;
     }
 
-    const review = await Review.create({
-      user: req.user._id,
-      title,
-      codeSnippet,
-      language,
-      aiFeedback,
-      bugsFound,
-    });
+    let review = null;
+    if (saveToHistory) {
+      review = await Review.create({
+        user: req.user._id,
+        title,
+        codeSnippet,
+        language,
+        aiFeedback,
+        bugsFound,
+      });
 
-    // Log the successful AI call
+      // Notification
+      const notification = await Notification.create({
+        user: req.user._id,
+        type: 'review_complete',
+        message: `AI review completed for "${title || 'Untitled'}". ${bugsFound > 0 ? bugsFound + ' issue(s) found.' : 'No issues found!'}`,
+        link: `/review/${review._id}`,
+      });
+
+      if (userSocket) {
+        io.to(userSocket).emit('liveNotification', notification);
+      }
+    } else {
+      // Create a temporary object mocking the Review schema
+      review = {
+        _id: 'temporary_' + Date.now(),
+        user: req.user._id,
+        title: (title || 'Untitled Review') + ' (Unsaded Session)',
+        codeSnippet,
+        language,
+        aiFeedback,
+        bugsFound,
+        status: 'Unsaved',
+        isTemporary: true,
+        createdAt: new Date(),
+      };
+    }
+
+    // Log the AI call (always for audit, but link only if saved)
     await AiLog.create({
       user: req.user._id,
-      review: review._id,
+      review: saveToHistory ? review?._id : null,
       prompt,
       response: aiFeedback,
       model: 'llama-3.3-70b-versatile',
@@ -109,22 +139,14 @@ export const analyzeCode = async (req, res) => {
       tokensUsed,
       responseTimeMs,
       status: 'success',
-    });
-
-    // Notification
-    const notification = await Notification.create({
-      user: req.user._id,
-      type: 'review_complete',
-      message: `AI review completed for "${title || 'Untitled'}". ${bugsFound > 0 ? bugsFound + ' issue(s) found.' : 'No issues found!'}`,
-      link: `/review/${review._id}`,
+      isTemporary: !saveToHistory,
     });
 
     if (userSocket) {
-      io.to(userSocket).emit('liveNotification', notification);
       io.to(userSocket).emit('aiProgress', 'Done');
     }
 
-    res.status(201).json(review);
+    res.status(saveToHistory ? 201 : 200).json(review);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error during analysis' });

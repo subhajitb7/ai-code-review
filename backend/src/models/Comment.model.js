@@ -4,8 +4,11 @@ const commentSchema = mongoose.Schema(
   {
     review: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'Review',
+    },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +22,14 @@ const commentSchema = mongoose.Schema(
     lineNumber: {
       type: Number,
       default: null,
+    },
+    isTodo: {
+      type: Boolean,
+      default: false,
+    },
+    isCompleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

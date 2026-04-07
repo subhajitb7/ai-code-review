@@ -102,9 +102,20 @@ const Projects = () => {
                 </button>
               </div>
               <p className="text-sm text-sec flex-grow line-clamp-2 leading-relaxed">{proj.description || 'No description'}</p>
-              <div className="mt-4 pt-4 border-t border-col flex justify-between text-sm text-sec font-medium">
-                <span className="flex items-center gap-1"><FileCode className="h-3 w-3" /> {proj.fileCount || 0} files</span>
-                <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
+              <div className="mt-4 pt-4 border-t border-col flex flex-col gap-2">
+                <div className="flex justify-between text-[11px] text-sec font-bold uppercase tracking-tight">
+                  <span className="flex items-center gap-1.5"><FileCode className="h-3.5 w-3.5 text-primary-500" /> {proj.fileCount || 0} files</span>
+                  <span className="bg-ter/50 px-2 py-0.5 rounded text-[9px] border border-col">v{proj.currentVersion || 1}</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-sec font-medium">
+                   <div className="flex items-center gap-1.5">
+                      <div className="h-4 w-4 rounded-full bg-primary-500/10 flex items-center justify-center text-[8px] font-black text-primary-600 border border-primary-500/20">
+                        {proj.owner?.name?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                      <span className="truncate max-w-[100px]">Owner: <span className="text-main font-bold">{proj.owner?.name || 'Unknown'}</span></span>
+                   </div>
+                   <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
             </Link>
           ))}

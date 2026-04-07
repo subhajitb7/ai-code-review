@@ -10,13 +10,13 @@ import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
 import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ThemeContext } from '../context/ThemeContext';
-import { AlertTriangle, CheckCircle, Loader2, Send, Code, Sparkles, ChevronDown } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, Send, Code, Sparkles, ChevronDown, History, ZapOff, ShieldOff } from 'lucide-react';
+import Editor from '@monaco-editor/react';
 
 SyntaxHighlighter.registerLanguage('jsx', jsx);
 SyntaxHighlighter.registerLanguage('javascript', jsx);
 SyntaxHighlighter.registerLanguage('python', python);
 SyntaxHighlighter.registerLanguage('typescript', typescript);
-import Editor from '@monaco-editor/react';
 
 
 const NewReview = () => {
@@ -32,6 +32,7 @@ const NewReview = () => {
   const [error, setError] = useState(null);
   const { socket } = useContext(AuthContext);
   const [aiProgressText, setAiProgressText] = useState('Uploading code snippet for AI processing...');
+  const [saveHistory, setSaveHistory] = useState(true);
 
   const languages = [
     { id: 'javascript', name: 'JavaScript / React' },
@@ -113,6 +114,7 @@ const NewReview = () => {
         title: title || 'Untitled Review',
         language,
         codeSnippet,
+        saveToHistory: saveHistory,
       });
       setResult(data);
     } catch (err) {
@@ -125,7 +127,13 @@ const NewReview = () => {
   const currentLangName = languages.find(l => l.id === language)?.name || language;
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-main">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-main">
+      {!saveHistory && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 flex items-center justify-center gap-2 animate-in slide-in-from-top duration-500">
+           <ZapOff className="h-3.5 w-3.5 text-amber-500" />
+           <p className="text-[10px] sm:text-xs font-bold text-amber-500 uppercase tracking-widest">Temporary Mode is ON — <span className="font-medium text-sec lowercase tracking-normal normal-case">Reviews will not be stored in your history.</span></p>
+        </div>
+      )}
       <div className="border-b border-col bg-sec p-4 shadow-sm relative z-50">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex w-full sm:w-auto items-center gap-4 flex-1">
@@ -192,17 +200,37 @@ const NewReview = () => {
                 )}
              </div>
           </div>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !codeSnippet.trim()}
-            className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
-            ) : (
-              <><Sparkles className="h-4 w-4" /> Analyze Code</>
-            )}
-          </button>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <span className={`text-xs font-bold transition-colors ${saveHistory ? 'text-sec' : 'text-amber-500'}`}>
+                 {saveHistory ? 'History ON' : 'Temporary Chat'}
+              </span>
+              <button 
+                onClick={() => setSaveHistory(!saveHistory)}
+                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20 ${
+                  !saveHistory ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                    !saveHistory ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !codeSnippet.trim()}
+              className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg shadow-primary-500/20"
+            >
+              {loading ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
+              ) : (
+                <><Sparkles className="h-4 w-4 group-hover:rotate-12 transition-transform" /> Analyze Code</>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -248,7 +276,7 @@ const NewReview = () => {
                )}
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-main">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-transparent pb-8">
                {loading && (
                  <div className="flex flex-col items-center justify-center h-full text-sec gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
@@ -292,7 +320,7 @@ const NewReview = () => {
                         }
                       }}
                     >
-                      {result.aiFeedback.replace(/^#+\s*(Code Review|AI Code Review).*\n/i, '')}
+                      {result.aiFeedback.trim().replace(/^#+\s*(Code Review|AI Code Review).*\n/i, '')}
                     </ReactMarkdown>
                  </div>
                )}

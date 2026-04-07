@@ -13,6 +13,7 @@
 Our core analysis hub provides more than just linting; it delivers autonomous, multi-layered intelligence for your code.
 
 - **🚀 Smart Language Badge**: Instantly identifies over **20+ tech stacks** (Rust, Go, Python, Swift, etc.) via file extensions and AI-powered content analysis.
+- **⚡ Quick Mode (Unsaved Sessions)**: Perform rapid AI analysis without saving to history. Ideal for throwaway snippets and one-time code checks.
 - **✨ Zero-Click AI Analysis**: Real-time logic error detection, security vulnerability identification, and performance optimization tips.
 - **🧩 Monaco-Powered Editor**: A high-performance, browser-based coding environment with full syntax highlighting and responsive styling.
 - **📈 Historical Versioning**: Every review is versioned (v1, v2, etc.), allowing you to track code improvements and AI feedback cycles over time.

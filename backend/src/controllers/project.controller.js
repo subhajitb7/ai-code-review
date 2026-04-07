@@ -3,6 +3,7 @@ import CodeFile from '../models/CodeFile.model.js';
 import Notification from '../models/Notification.model.js';
 import Team from '../models/Team.model.js';
 import User from '../models/User.model.js';
+import Comment from '../models/Comment.model.js';
 import axios from 'axios';
 import { getProjectAccess } from '../utils/projectUtils.js';
 
@@ -64,7 +65,7 @@ export const getUserProjects = async (req, res) => {
         { owner: userId },
         { _id: { $in: linkedProjectIds } }
       ]
-    }).sort({ createdAt: -1 });
+    }).populate('owner', 'name').sort({ createdAt: -1 });
 
     // Add file count for each project
     const projectsWithCounts = await Promise.all(
@@ -100,7 +101,12 @@ export const getProjectById = async (req, res) => {
     }
 
     const files = await CodeFile.find({ project: access.project._id }).select('-content -versions').sort({ createdAt: -1 });
-    res.json({ ...access.project.toObject(), files, canDelete: access.canDelete });
+    res.json({ 
+      ...access.project.toObject(), 
+      files, 
+      canDelete: access.canDelete,
+      team: access.team ? { _id: access.team._id, name: access.team.name } : null
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -339,6 +345,54 @@ export const deleteFile = async (req, res) => {
     res.json({ message: 'File deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error deleting file' });
+  }
+};
+
+// @desc    Get project comments/notes
+// @route   GET /api/projects/:id/comments
+// @access  Private
+export const getProjectComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({ project: req.params.id })
+      .populate('user', 'name')
+      .sort({ createdAt: 1 });
+    res.json(comments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching comments' });
+  }
+};
+
+// @desc    Add comment/note to project
+// @route   POST /api/projects/:id/comments
+// @access  Private
+export const addProjectComment = async (req, res) => {
+  try {
+    const { text, isTodo } = req.body;
+    if (!text) return res.status(400).json({ message: 'Comment text is required' });
+
+    const access = await getProjectAccess(req.params.id, req.user._id);
+    if (!access.exists) return res.status(404).json({ message: 'Project not found' });
+    if (!access.canEdit) return res.status(403).json({ message: 'Not authorized' });
+
+    const comment = await Comment.create({
+      project: req.params.id,
+      user: req.user._id,
+      text,
+      isTodo: !!isTodo
+    });
+
+    const populatedComment = await Comment.findById(comment._id).populate('user', 'name');
+
+    // Emit socket event for real-time collaboration
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`project:${req.params.id}`).emit('newComment', populatedComment);
+    }
+
+    res.status(201).json(populatedComment);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error adding comment' });
   }
 };

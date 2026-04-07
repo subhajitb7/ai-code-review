@@ -5,6 +5,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FileCode, Plus, FolderOpen, ArrowLeft, X, Upload, Trash2, RefreshCw, Settings, ChevronDown, CheckCircle, Sparkles } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { ThemeContext } from '../context/ThemeContext';
+import CommentSection from '../components/CommentSection';
+import { MessageSquare, StickyNote } from 'lucide-react';
+
 const ProjectDetail = () => {
   const { theme } = useContext(ThemeContext);
   const { id } = useParams();
@@ -194,7 +197,14 @@ const ProjectDetail = () => {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-main">{project.name}</h1>
-            <p className="text-sec text-sm mt-1 font-medium">{project.description || 'No description'} · <span className="uppercase text-primary-600 font-bold">{project.language}</span></p>
+            <p className="text-sec text-sm mt-1 font-medium">
+              {project.description || 'No description'} · <span className="uppercase text-primary-600 font-bold">{project.language}</span>
+              {project.owner && (
+                <span className="ml-3 px-2 py-0.5 bg-primary-500/10 text-primary-600 rounded-full text-[10px] uppercase font-black tracking-widest border border-primary-500/20 shadow-sm">
+                  Owner: {project.owner.name}
+                </span>
+              )}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -372,6 +382,22 @@ const ProjectDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Project Notes / Discussion */}
+      <div className="glass-panel p-6 mt-8 shadow-xl">
+        <h2 className="text-xl font-bold text-main mb-6 flex items-center gap-2">
+          {project.team ? (
+            <MessageSquare className="h-5 w-5 text-primary-600" />
+          ) : (
+            <StickyNote className="h-5 w-5 text-primary-600" />
+          )}
+          {project.team ? 'Team Discussion' : 'My Project Notes'}
+        </h2>
+        <CommentSection 
+          projectId={id} 
+          title={project.team ? 'Discussion' : 'Notes'} 
+        />
+      </div>
     </div>
   );
 };

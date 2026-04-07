@@ -3,7 +3,7 @@ import { useContext, useState, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import {
   Code2, LogOut, User as UserIcon, MessageSquare, Shield, ChevronDown,
-  Users, FileText, BarChart3, Brain, FolderOpen, LayoutDashboard, Menu, X, Sun, Moon
+  Users, FileText, BarChart3, Brain, FolderOpen, LayoutDashboard, Menu, X, Sun, Moon, History
 } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
@@ -57,6 +57,7 @@ const Navbar = () => {
   const primaryLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/projects', label: 'Projects', icon: FolderOpen },
+    { to: '/reviews', label: 'Review Vault', icon: History },
     { to: '/teams', label: 'Teams', icon: Users },
     { to: '/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/ai-logs', label: 'AI Logs', icon: Brain },

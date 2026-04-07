@@ -172,13 +172,7 @@ const ReviewDetail = () => {
         </div>
       </div>
 
-      {/* Comment Section */}
-      <div className="glass-panel p-6 shadow-xl">
-        <h2 className="text-xl font-bold text-main mb-6 flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-primary-600" /> Discussion
-        </h2>
-        <CommentSection reviewId={id} />
-      </div>
+      {/* Discussion section removed for Quick Code to keep it de-cluttered */}
     </div>
   );
 };

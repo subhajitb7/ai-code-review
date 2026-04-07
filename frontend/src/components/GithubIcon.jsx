@@ -1,3 +1,5 @@
+import React from 'react';
+
 const GithubIcon = ({ className = "h-5 w-5" }) => (
   <svg 
     viewBox="0 0 24 24" 

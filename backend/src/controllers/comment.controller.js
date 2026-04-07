@@ -92,3 +92,38 @@ export const deleteComment = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// @desc    Update comment (text or completion)
+// @route   PUT /api/comments/:id
+// @access  Private
+export const updateComment = async (req, res) => {
+  try {
+    const { text, isCompleted } = req.body;
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    if (comment.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    if (text !== undefined) comment.text = text;
+    if (isCompleted !== undefined) comment.isCompleted = isCompleted;
+
+    await comment.save();
+    const populated = await Comment.findById(comment._id).populate('user', 'name email');
+
+    const io = req.app.get('io');
+    if (io) {
+      const room = comment.review ? `review:${comment.review}` : `project:${comment.project}`;
+      io.to(room).emit('commentUpdated', populated);
+    }
+
+    res.json(populated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

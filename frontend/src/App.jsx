@@ -9,6 +9,7 @@ import VerifyOtp from './pages/VerifyOtp';
 import Dashboard from './pages/Dashboard';
 import NewReview from './pages/NewReview';
 import ReviewDetail from './pages/ReviewDetail';
+import ReviewHistory from './pages/ReviewHistory';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import FileViewer from './pages/FileViewer';
@@ -48,7 +49,7 @@ function AppContent() {
     <Router>
       <div className="min-h-screen bg-main text-main flex flex-col transition-colors duration-300">
         <Navbar />
-        <main className="flex-grow flex flex-col">
+        <main className="flex-grow flex flex-col min-h-0 overflow-hidden">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -58,6 +59,7 @@ function AppContent() {
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/new-review" element={<PrivateRoute><NewReview /></PrivateRoute>} />
             <Route path="/review/:id" element={<PrivateRoute><ReviewDetail /></PrivateRoute>} />
+            <Route path="/reviews" element={<PrivateRoute><ReviewHistory /></PrivateRoute>} />
             <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
             <Route path="/projects/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
             <Route path="/projects/:id/files/:fileId" element={<PrivateRoute><FileViewer /></PrivateRoute>} />

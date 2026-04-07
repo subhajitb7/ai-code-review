@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import {
   FileCode, History, Plus, AlertCircle, CheckCircle2,
-  BarChart3, Bug, CheckCircle, Shield, Loader2, Upload
+  BarChart3, Bug, CheckCircle, Shield, Loader2, Upload, ChevronRight
 } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
 import SearchBar from '../components/SearchBar';
 import { AuthContext } from '../context/AuthContext';
-import { useContext } from 'react';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -66,7 +65,7 @@ const Dashboard = () => {
         <div className="flex flex-wrap items-center gap-2">
           <SearchBar />
           <Link to="/new-review" className="btn-primary flex items-center justify-center gap-2 h-10 px-4 text-xs font-bold shadow-lg shadow-primary-500/10">
-            <Plus className="h-3.5 w-3.5" /> Paste Code
+            <Plus className="h-3.5 w-3.5" /> Quick Code
           </Link>
           <Link to="/new-review" className="btn-secondary flex items-center justify-center gap-2 h-10 px-4 text-xs font-bold border-col">
             <Upload className="h-3.5 w-3.5" /> Upload File
@@ -114,9 +113,14 @@ const Dashboard = () => {
       {/* Reviews Section */}
       <div className="glass-panel p-6">
         <div className="flex items-center justify-between mb-6 border-b border-col pb-4">
-          <div className="flex items-center gap-3">
-            <History className="h-5 w-5 text-primary-500" />
-            <h2 className="text-xl font-bold text-main">Recent Reviews</h2>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <History className="h-5 w-5 text-primary-500" />
+              <h2 className="text-xl font-bold text-main">Recent Reviews</h2>
+            </div>
+            <Link to="/reviews" className="text-xs font-bold text-primary-500 hover:text-primary-600 transition-colors flex items-center gap-1 group">
+              View All History <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
           {/* Filter */}
           <div className="flex gap-2">

@@ -5,12 +5,15 @@ import Team from '../models/Team.model.js';
  * Helper to check if a user has access to a project (as owner OR team member)
  */
 export const getProjectAccess = async (projectId, userId) => {
-  const project = await Project.findById(projectId);
+  const project = await Project.findById(projectId).populate('owner', 'name');
   if (!project) return { exists: false };
 
   // 1. Is the user the direct owner?
-  if (project.owner.toString() === userId.toString()) {
-    return { exists: true, project, canEdit: true, canDelete: true };
+  const ownerId = project.owner._id ? project.owner._id.toString() : project.owner.toString();
+  if (ownerId === userId.toString()) {
+    // Even if owner, check if it's linked to any of their teams
+    const team = await Team.findOne({ projects: projectId });
+    return { exists: true, project, team, canEdit: true, canDelete: true };
   }
 
   // 2. Is the user a member of a team that has linked this project?
@@ -25,10 +28,11 @@ export const getProjectAccess = async (projectId, userId) => {
     return { 
       exists: true, 
       project, 
-      canEdit: true, // All team members can upload/edit files
-      canDelete: isAdmin // Only team admins/owners can delete the project
+      team,
+      canEdit: true, 
+      canDelete: isAdmin 
     };
   }
 
-  return { exists: true, project, canEdit: false, canDelete: false };
+  return { exists: true, project, team: null, canEdit: false, canDelete: false };
 };
