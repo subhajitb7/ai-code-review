@@ -164,6 +164,7 @@ export const logoutUser = (req, res) => {
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile
+// @access  Private
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
@@ -175,6 +176,30 @@ export const getUserProfile = async (req, res) => {
     });
   } else {
     res.status(404).json({ message: 'User not found' });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.name = req.body.name || user.name;
+    // We can also allow email updates here later if needed
+    
+    const updatedUser = await user.save();
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error updating profile' });
   }
 };
 

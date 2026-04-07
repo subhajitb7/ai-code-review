@@ -21,5 +21,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/verify-2fa', verify2fa);
 router.get('/profile', protect, getUserProfile);
+router.put('/profile', protect, updateUserProfile);
 
 export default router;

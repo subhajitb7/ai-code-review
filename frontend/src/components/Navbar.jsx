@@ -16,16 +16,24 @@ const Navbar = () => {
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const moreRef = useRef(null);
   const adminRef = useRef(null);
+  const userMenuRef = useRef(null);
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleOutside = (e) => {
       if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
       if (adminRef.current && !adminRef.current.contains(e.target)) setAdminOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
     };
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
@@ -63,7 +71,8 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="border-b border-col bg-main/80 backdrop-blur-md sticky top-0 z-50">
+    <>
+      <nav className="border-b border-col bg-main/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo + Nav */}
@@ -162,23 +171,53 @@ const Navbar = () => {
                   {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </button>
                 <NotificationBell />
-                <div className="hidden sm:flex items-center gap-2 ml-1 shrink-0">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin
-                      ? 'bg-yellow-500/15 text-yellow-600 ring-1 ring-yellow-500/30'
-                      : 'bg-primary-500/15 text-primary-600'
-                    }`}>
-                    {user.name?.charAt(0).toUpperCase()}
+                  {/* User Profile Dropdown */}
+                  <div className="relative" ref={userMenuRef}>
+                    <button 
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center gap-2 ml-1 shrink-0 p-1 rounded-lg hover:bg-sec transition-all"
+                    >
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin
+                          ? 'bg-yellow-500/15 text-yellow-600 ring-1 ring-yellow-500/30'
+                          : 'bg-primary-500/15 text-primary-600'
+                        }`}>
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="hidden xl:block text-left">
+                        <p className="text-sm font-bold text-main leading-tight">{user.name}</p>
+                        <p className={`text-[10px] leading-tight font-medium ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
+                          {isAdmin ? '★ Admin' : 'Member'}
+                        </p>
+                      </div>
+                      <ChevronDown className={`h-3 w-3 text-sec transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {userMenuOpen && (
+                      <div className="absolute top-full mt-3 right-0 w-64 glass-panel shadow-2xl overflow-hidden z-50">
+                        <div className="p-4 border-b border-col bg-sec/30">
+                          <p className="text-sm font-bold text-main truncate leading-tight">{user.name}</p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
+                            {isAdmin ? 'Administrator' : 'Verified Member'}
+                          </p>
+                        </div>
+                        <div className="p-2">
+                          <Link 
+                            to="/profile" 
+                            onClick={() => setUserMenuOpen(false)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sec hover:text-primary-500 hover:bg-primary-500/10 rounded-lg transition-all font-bold text-sm mb-1"
+                          >
+                            <UserIcon className="h-4 w-4" /> My Profile
+                          </Link>
+                          <button 
+                            onClick={() => { setShowLogoutConfirm(true); setUserMenuOpen(false); }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all font-bold text-sm"
+                          >
+                            <LogOut className="h-4 w-4" /> Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="hidden xl:block">
-                    <p className="text-sm font-medium text-main leading-tight">{user.name}</p>
-                    <p className={`text-[10px] leading-tight font-medium ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
-                      {isAdmin ? '★ Admin' : 'Member'}
-                    </p>
-                  </div>
-                </div>
-                <button onClick={handleLogout} className="p-2 text-sec hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Sign out">
-                  <LogOut className="h-5 w-5" />
-                </button>
 
                 {/* Mobile menu toggle */}
                 <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-sec hover:text-main transition-colors">
@@ -198,6 +237,17 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {user && mobileOpen && (
         <div className="md:hidden border-t border-col bg-main shadow-2xl backdrop-blur-md">
+          <div className="p-4 border-b border-col flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin ? 'bg-yellow-500/15 text-yellow-600' : 'bg-primary-500/15 text-primary-600'}`}>
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="font-bold text-main leading-tight">{user.name}</p>
+              <p className={`text-[10px] font-bold uppercase mt-0.5 ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
+                {isAdmin ? 'Administrator' : 'Verified Member'}
+              </p>
+            </div>
+          </div>
           {[...primaryLinks, ...secondaryLinks].map((l) => (
             <NavLink key={l.to} {...l} mobile />
           ))}
@@ -209,10 +259,44 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          <button 
+            onClick={() => setShowLogoutConfirm(true)}
+            className="w-full flex items-center gap-2 px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-500/10"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </button>
         </div>
       )}
     </nav>
-  );
+
+    {/* Logout Confirmation Modal */}
+    {showLogoutConfirm && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all">
+        <div className="glass-panel w-full max-w-sm p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-white/10 animate-in zoom-in-95 duration-200">
+          <div className="h-16 w-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+            <LogOut className="h-8 w-8 text-rose-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-center text-main mb-2">Are you sure?</h2>
+          <p className="text-sec text-center font-medium mb-8">You will be signed out of your account on this device.</p>
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={() => setShowLogoutConfirm(false)}
+              className="btn-secondary h-12 font-bold"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-rose-500/20 h-12"
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
+);
 };
 
 export default Navbar;
