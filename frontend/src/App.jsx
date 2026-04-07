@@ -21,6 +21,7 @@ import Teams from './pages/Teams';
 import TeamDetail from './pages/TeamDetail';
 import AiLogs from './pages/AiLogs';
 import Profile from './pages/Profile';
+import SecurityUpdate from './pages/SecurityUpdate';
 import AiChatFloating from './components/AiChatFloating';
 
 // Axios global defaults
@@ -56,6 +57,7 @@ function AppContent() {
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/security-update" element={<PrivateRoute><SecurityUpdate /></PrivateRoute>} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/new-review" element={<PrivateRoute><NewReview /></PrivateRoute>} />
             <Route path="/review/:id" element={<PrivateRoute><ReviewDetail /></PrivateRoute>} />

@@ -75,9 +75,31 @@ const AuthPage = () => {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="glass-input" placeholder="name@example.com" />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 relative">
             <label className="text-sm font-bold text-sec">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
+            {!isLogin && password && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  { label: '6-8 Chars', met: password.length >= 6 && password.length <= 8 },
+                  { label: 'Uppercase', met: /[A-Z]/.test(password) },
+                  { label: 'Lowercase', met: /[a-z]/.test(password) },
+                  { label: 'Number', met: /\d/.test(password) },
+                  { label: 'Symbol (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
+                ].map((req) => (
+                  <span 
+                    key={req.label} 
+                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${
+                      req.met 
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30' 
+                        : 'bg-red-500/5 text-red-500/40 border-red-500/10'
+                    }`}
+                  >
+                    {req.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {isLogin && (
@@ -88,7 +110,11 @@ const AuthPage = () => {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="btn-primary mt-2 disabled:opacity-50">
+          <button 
+            type="submit" 
+            disabled={loading || (!isLogin && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(password))} 
+            className="btn-primary mt-2 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-primary-500/10"
+          >
             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
           </button>
         </form>

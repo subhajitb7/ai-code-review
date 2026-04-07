@@ -52,10 +52,14 @@ const ResetPassword = () => {
       setError('Please enter the full 6-digit code');
       return;
     }
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    
+    // Strict password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/;
+    if (!passwordRegex.test(newPassword)) {
+      setError('Password must be 6-8 characters with Uppercase, Lowercase, Number & Symbol');
       return;
     }
+
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -82,6 +86,8 @@ const ResetPassword = () => {
     }
   };
 
+  const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(newPassword);
+
   if (success) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 relative">
@@ -90,8 +96,8 @@ const ResetPassword = () => {
           <div className="h-16 w-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-8 w-8 text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold mb-3">Password Reset Successful!</h2>
-          <p className="text-gray-400 mb-6">You can now sign in with your new password.</p>
+          <h2 className="text-2xl font-bold mb-3 text-main">Password Reset Successful!</h2>
+          <p className="text-sec font-medium mb-6">You can now sign in with your new password.</p>
           <Link to="/auth" className="btn-primary inline-block">Go to Sign In</Link>
         </div>
       </div>
@@ -101,13 +107,13 @@ const ResetPassword = () => {
   return (
     <div className="flex-1 flex items-center justify-center p-6 relative">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="glass-panel w-full max-w-md p-8 z-10">
+      <div className="glass-panel w-full max-w-md p-8 z-10 shadow-2xl">
         <div className="h-14 w-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Lock className="h-7 w-7 text-primary-400" />
         </div>
-        <h2 className="text-3xl font-bold text-center mb-2">Reset Password</h2>
-        <p className="text-gray-400 text-center mb-8">
-          Enter the code sent to <span className="text-primary-400 font-medium">{email}</span>
+        <h2 className="text-3xl font-bold text-center mb-2 text-main">Reset Password</h2>
+        <p className="text-sec font-medium text-center mb-8">
+          Enter the code sent to <span className="text-primary-400 font-bold">{email}</span>
         </p>
 
         {error && (
@@ -117,7 +123,7 @@ const ResetPassword = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {/* OTP Input */}
           <div>
-            <label className="text-sm font-medium text-gray-300 mb-2 block">Reset Code</label>
+            <label className="text-sm font-bold text-sec mb-2 block tracking-tight">Reset Code</label>
             <div className="flex justify-center gap-3">
               {otp.map((digit, index) => (
                 <input
@@ -136,17 +142,39 @@ const ResetPassword = () => {
           </div>
 
           {/* New Password */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-300">New Password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="glass-input" placeholder="Min 6 characters" />
+          <div className="flex flex-col gap-2 relative">
+            <label className="text-sm font-bold text-sec tracking-tight">New Password</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
+            {newPassword && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  { label: '6-8 Chars', met: newPassword.length >= 6 && newPassword.length <= 8 },
+                  { label: 'Uppercase', met: /[A-Z]/.test(newPassword) },
+                  { label: 'Lowercase', met: /[a-z]/.test(newPassword) },
+                  { label: 'Number', met: /\d/.test(newPassword) },
+                  { label: 'Symbol (@$!%*?&)', met: /[@$!%*?&]/.test(newPassword) },
+                ].map((req) => (
+                  <span 
+                    key={req.label} 
+                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${
+                      req.met 
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30' 
+                        : 'bg-red-500/5 text-red-500/40 border-red-500/10'
+                    }`}
+                  >
+                    {req.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-300">Confirm Password</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="glass-input" placeholder="Confirm new password" />
+            <label className="text-sm font-bold text-sec tracking-tight">Confirm Password</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
           </div>
 
-          <button type="submit" disabled={loading} className="btn-primary mt-2 disabled:opacity-50">
+          <button type="submit" disabled={loading || !isPasswordValid || newPassword !== confirmPassword} className="btn-primary mt-2 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-primary-500/10">
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>

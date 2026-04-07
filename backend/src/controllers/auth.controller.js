@@ -4,6 +4,12 @@ import { sendOtpEmail } from '../utils/sendEmail.js';
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+const validatePassword = (password) => {
+  // 6-8 characters, at least one uppercase, one lowercase, one number and one special character
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/;
+  return regex.test(password);
+};
+
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 export const authUser = async (req, res) => {
@@ -30,6 +36,9 @@ export const authUser = async (req, res) => {
       });
     }
 
+    // Check if legacy password meets new rules
+    user.mustUpdatePassword = !validatePassword(password);
+    
     // Always require 2FA after password check
     const otp = generateOtp();
     user.otp = otp;
@@ -61,6 +70,12 @@ export const authUser = async (req, res) => {
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!validatePassword(password)) {
+      return res.status(400).json({ 
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -203,6 +218,39 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
+// @desc    Upgrade legacy password
+// @route   PUT /api/auth/profile/upgrade-password
+// @access  Private
+export const upgradePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({ 
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.password = newPassword;
+    user.mustUpdatePassword = false;
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      mustUpdatePassword: false
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error upgrading password' });
+  }
+};
+
 // @desc    Forgot password — send reset OTP
 // @route   POST /api/auth/forgot-password
 export const forgotPassword = async (req, res) => {
@@ -234,8 +282,10 @@ export const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
 
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({ 
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      });
     }
 
     const user = await User.findOne({ email });
@@ -288,6 +338,7 @@ export const verify2fa = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      mustUpdatePassword: user.mustUpdatePassword
     });
   } catch (error) {
     console.error(error);

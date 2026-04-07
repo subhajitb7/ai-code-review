@@ -43,6 +43,10 @@ const userSchema = mongoose.Schema(
     otpExpiry: {
       type: Date,
     },
+    mustUpdatePassword: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

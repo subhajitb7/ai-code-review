@@ -59,7 +59,12 @@ const VerifyOtp = () => {
       const endpoint = type === '2fa' ? '/api/auth/verify-2fa' : '/api/auth/verify-otp';
       const { data } = await axios.post(endpoint, { email, otp: otpString });
       localStorage.setItem('userInfo', JSON.stringify(data));
-      window.location.href = '/dashboard'; // Full reload to pick up auth state
+      
+      if (data.mustUpdatePassword) {
+        navigate('/security-update');
+      } else {
+        window.location.href = '/dashboard'; 
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
     } finally {
