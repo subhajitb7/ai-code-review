@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import axios from 'axios';
 import { MessageSquare, Send, X, Bot, User, Loader2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -12,6 +13,7 @@ const AiChatFloating = () => {
   ]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,24 +47,24 @@ const AiChatFloating = () => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-[350px] sm:w-[400px] h-[500px] glass-panel flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 shadow-2xl border-primary-500/20">
+        <div className="mb-4 w-[350px] sm:w-[400px] h-[500px] glass-panel flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 shadow-2xl border-primary-500/10">
           {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-primary-600/10">
+          <div className="p-4 border-b border-col flex items-center justify-between bg-primary-600/5">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary-500 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">AI Assistant</h3>
+                <h3 className="text-sm font-bold text-main">AI Assistant</h3>
                 <div className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[10px] text-gray-400">Online</span>
+                  <span className="text-[10px] text-sec">Online</span>
                 </div>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-1 hover:bg-main/5 rounded-lg transition-colors text-sec hover:text-main"
             >
               <Minimize2 className="h-4 w-4" />
             </button>
@@ -71,20 +73,20 @@ const AiChatFloating = () => {
           {/* Messages */}
           <div 
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-dark-600"
+            className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin"
           >
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`flex gap-2 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center ${m.role === 'user' ? 'bg-dark-700' : 'bg-primary-600'}`}>
-                    {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                  <div className={`h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center ${m.role === 'user' ? 'bg-ter border border-col' : 'bg-primary-600 shadow-md shadow-primary-500/20'}`}>
+                    {m.role === 'user' ? <User className={`h-4 w-4 ${theme === 'dark' ? 'text-white' : 'text-primary-600'}`} /> : <Bot className="h-4 w-4 text-white" />}
                   </div>
                   <div className={`p-3 rounded-2xl text-sm ${
                     m.role === 'user' 
-                      ? 'bg-primary-600 text-white rounded-tr-none' 
-                      : 'bg-dark-800 border border-white/5 text-gray-200 rounded-tl-none'
+                      ? 'bg-primary-600 text-white rounded-tr-none shadow-lg shadow-primary-500/20' 
+                      : 'bg-sec border border-col text-main rounded-tl-none'
                   }`}>
-                    <div className="ai-feedback-content prose prose-invert prose-sm max-w-none">
+                    <div className={`ai-feedback-content prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {m.content}
                       </ReactMarkdown>
@@ -96,12 +98,12 @@ const AiChatFloating = () => {
             {loading && (
               <div className="flex justify-start">
                 <div className="flex gap-2 max-w-[85%]">
-                  <div className="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-4 w-4" />
+                  <div className="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
+                    <Bot className="h-4 w-4 text-white" />
                   </div>
-                  <div className="bg-dark-800 border border-white/5 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary-400" />
-                    <span className="text-xs text-gray-400">Typing...</span>
+                  <div className="bg-sec border border-col p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+                    <span className="text-xs text-sec">Typing...</span>
                   </div>
                 </div>
               </div>
@@ -109,7 +111,7 @@ const AiChatFloating = () => {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-dark-800">
+          <form onSubmit={handleSend} className="p-4 border-t border-col bg-sec">
             <div className="relative">
               <input
                 type="text"
@@ -135,13 +137,13 @@ const AiChatFloating = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${
           isOpen 
-            ? 'bg-dark-800 border border-white/10 text-white rotate-90' 
+            ? 'glass-panel text-primary-500 rotate-90 border-primary-500/30' 
             : 'bg-primary-600 text-white'
         }`}
       >
         {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
         {!isOpen && (
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-dark-900 animate-bounce"></span>
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-main animate-bounce"></span>
         )}
       </button>
     </div>

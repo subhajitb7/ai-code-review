@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
 import { 
   AreaChart as ReAreaChart, 
   Area, 
@@ -9,13 +10,13 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label, theme }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-panel p-3 border border-primary-500/30 backdrop-blur-md shadow-2xl shadow-primary-500/20">
-        <p className="text-xs text-gray-400 mb-1 font-mono uppercase tracking-wider">{label}</p>
-        <p className="text-lg font-bold text-white leading-none">
-          {payload[0].value} <span className="text-xs text-primary-400 font-normal">Reviews</span>
+      <div className="glass-panel p-3 border border-primary-500/30 backdrop-blur-md shadow-2xl shadow-primary-500/10">
+        <p className="text-xs text-sec mb-1 font-mono uppercase tracking-wider">{label}</p>
+        <p className="text-lg font-bold text-main leading-none">
+          {payload[0].value} <span className="text-xs text-primary-500 font-normal">Reviews</span>
         </p>
         {payload[0].payload.bugs !== undefined && (
           <p className="text-sm text-red-400 mt-1 font-medium">
@@ -29,6 +30,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const AreaChart = ({ data, color = "#3b82f6", gradientId = "colorPv" }) => {
+  const { theme } = useContext(ThemeContext);
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0';
+  const tickColor = theme === 'dark' ? '#64748b' : '#94a3b8';
+  const dotStroke = theme === 'dark' ? '#000' : '#f8fafc';
   return (
     <div className="w-full h-full min-h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -45,22 +50,22 @@ const AreaChart = ({ data, color = "#3b82f6", gradientId = "colorPv" }) => {
           <CartesianGrid 
             strokeDasharray="3 3" 
             vertical={false} 
-            stroke="#1e293b" 
+            stroke={gridColor} 
           />
           <XAxis 
             dataKey="_id" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#64748b', fontSize: 10 }}
+            tick={{ fill: tickColor, fontSize: 10 }}
             dy={10}
             tickFormatter={(val) => val.slice(5) || val} // Formats YYYY-MM-DD
           />
           <YAxis 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#64748b', fontSize: 10 }}
+            tick={{ fill: tickColor, fontSize: 10 }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip theme={theme} />} />
           <Area
             type="monotone"
             dataKey="count"
@@ -69,7 +74,7 @@ const AreaChart = ({ data, color = "#3b82f6", gradientId = "colorPv" }) => {
             fillOpacity={1}
             fill={`url(#${gradientId})`}
             animationDuration={1500}
-            dot={{ r: 4, fill: color, strokeWidth: 2, stroke: '#000' }}
+            dot={{ r: 4, fill: color, strokeWidth: 2, stroke: dotStroke }}
             activeDot={{ r: 6, strokeWidth: 0, className: "shadow-lg shadow-white" }}
           />
         </ReAreaChart>

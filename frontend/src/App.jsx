@@ -45,7 +45,7 @@ function AppContent() {
   const { user } = useContext(AuthContext);
   return (
     <Router>
-      <div className="min-h-screen bg-dark-900 text-white flex flex-col transition-colors duration-300">
+      <div className="min-h-screen bg-main text-main flex flex-col transition-colors duration-300">
         <Navbar />
         <main className="flex-grow flex flex-col">
           <Routes>

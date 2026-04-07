@@ -24,15 +24,17 @@
   --border-col: #2a2d35;
   --text-main: #ffffff;
   --text-sec: #9ca3af;
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
 }
 
 .light {
-  --bg-main: #ffffff;
-  --bg-sec: #f9fafb;
+  --bg-main: #f8fafc;
+  --bg-sec: #ffffff;
   --bg-ter: #f1f5f9;
-  --border-col: #e5e7eb;
-  --text-main: #111827;
-  --text-sec: #4b5563;
+  --border-col: #e2e8f0;
+  --text-main: #0f172a;
+  --text-sec: #64748b;
+  --shadow-premium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 }
 
 @layer base {
@@ -49,22 +51,60 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl shadow-2xl;
+    @apply backdrop-blur-xl border rounded-xl;
+    background-color: var(--bg-sec);
+    border-color: var(--border-col);
+    box-shadow: var(--shadow-premium);
+  }
+
+  .dark .glass-panel {
+    @apply bg-black/40 border-white/5;
   }
 
   .glass-input {
-    @apply bg-dark-900/50 border border-dark-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-1 focus:ring-primary-500 transition-colors;
+    @apply border rounded-lg px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary-500 transition-colors;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    border-color: var(--border-col);
   }
 
   .glass-input::placeholder {
-    color: #9ca3af;
+    color: var(--text-sec);
   }
 
   .btn-secondary {
-    @apply bg-dark-700 text-white font-medium py-2 px-4 rounded-lg border border-dark-600 shadow-sm transition-all;
+    @apply font-medium py-2 px-4 rounded-lg border transition-all;
+    background-color: var(--bg-ter);
+    color: var(--text-main);
+    border-color: var(--border-col);
   }
+
   .btn-secondary:hover {
-    @apply bg-dark-600;
+    background-color: var(--border-col);
+  }
+
+  .text-main {
+    color: var(--text-main);
+  }
+
+  .text-sec {
+    color: var(--text-sec);
+  }
+
+  .bg-main {
+    background-color: var(--bg-main);
+  }
+
+  .bg-sec {
+    background-color: var(--bg-sec);
+  }
+
+  .bg-ter {
+    background-color: var(--bg-ter);
+  }
+
+  .border-col {
+    border-color: var(--border-col);
   }
 }
 
@@ -78,10 +118,12 @@
   box-shadow: 0 10px 15px -3px oklch(from var(--color-primary-500) l c h / 0.3);
   transition: all 0.2s ease;
 }
+
 .btn-primary:hover {
   background: linear-gradient(to right, var(--color-primary-500), var(--color-primary-400));
   transform: translateY(-2px);
 }
+
 .btn-primary:active {
   transform: translateY(0);
 }
@@ -91,116 +133,165 @@
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-dark-600);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-dark-500);
 }
 
 /* AI Feedback rendered markdown styles */
 .ai-feedback-content {
-  color: #d1d5db;
+  color: var(--text-sec);
   font-size: 0.875rem;
   line-height: 1.75;
 }
+
 .ai-feedback-content h1,
 .ai-feedback-content h2,
 .ai-feedback-content h3,
 .ai-feedback-content h4 {
-  color: #f3f4f6;
+  color: var(--text-main);
   font-weight: 700;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
-.ai-feedback-content h1 { font-size: 1.5rem; }
-.ai-feedback-content h2 { font-size: 1.25rem; }
-.ai-feedback-content h3 { font-size: 1.1rem; }
-.ai-feedback-content h4 { font-size: 1rem; color: #60a5fa; }
+
+.ai-feedback-content h1 {
+  font-size: 1.5rem;
+}
+
+.ai-feedback-content h2 {
+  font-size: 1.25rem;
+}
+
+.ai-feedback-content h3 {
+  font-size: 1.1rem;
+}
+
+.ai-feedback-content h4 {
+  font-size: 1rem;
+  color: var(--color-primary-500);
+}
+
 .ai-feedback-content p {
   margin-bottom: 0.75rem;
 }
+
 .ai-feedback-content strong {
-  color: #f9fafb;
+  color: var(--text-main);
   font-weight: 600;
 }
+
 .ai-feedback-content code {
-  background: var(--color-dark-900);
-  border: 1px solid var(--color-dark-700);
+  background: var(--bg-ter);
+  border: 1px solid var(--border-col);
   padding: 0.15rem 0.4rem;
   border-radius: 0.25rem;
   font-size: 0.8rem;
   color: #f472b6;
   font-family: ui-monospace, monospace;
 }
+
 .ai-feedback-content pre {
-  background: var(--color-dark-900);
-  border: 1px solid var(--color-dark-700);
+  background: var(--bg-sec);
+  border: 1px solid var(--border-col);
   border-radius: 0.5rem;
   padding: 1rem;
   overflow-x: auto;
   margin: 1rem 0;
 }
+
 .ai-feedback-content pre code {
   background: none;
   border: none;
   padding: 0;
-  color: #e5e7eb;
+  color: var(--text-main);
   font-size: 0.8rem;
 }
+
 .ai-feedback-content ul,
 .ai-feedback-content ol {
   padding-left: 1.5rem;
   margin-bottom: 0.75rem;
 }
-.ai-feedback-content ul { list-style-type: disc; }
-.ai-feedback-content ol { list-style-type: decimal; }
+
+.ai-feedback-content ul {
+  list-style-type: disc;
+}
+
+.ai-feedback-content ol {
+  list-style-type: decimal;
+}
+
 .ai-feedback-content li {
   margin-bottom: 0.35rem;
 }
+
 .ai-feedback-content blockquote {
   border-left: 3px solid var(--color-primary-500);
   padding-left: 1rem;
-  color: #9ca3af;
+  color: var(--text-sec);
   margin: 1rem 0;
   font-style: italic;
 }
+
 .ai-feedback-content table {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
 }
+
 .ai-feedback-content th,
 .ai-feedback-content td {
-  border: 1px solid var(--color-dark-600);
+  border: 1px solid var(--border-col);
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
+
 .ai-feedback-content th {
-  background: var(--color-dark-800);
-  color: #f3f4f6;
+  background: var(--bg-sec);
+  color: var(--text-main);
   font-weight: 600;
 }
+
 .ai-feedback-content hr {
-  border-color: var(--color-dark-600);
+  border-color: var(--border-col);
   margin: 1.5rem 0;
 }
 
-/* Monaco Editor black background override */
+/* Dynamic Editor Overrides */
 .monaco-editor,
 .monaco-editor-background,
 .monaco-editor .inputarea.ime-input,
 .monaco-editor .margin,
 .monaco-editor .sticky-widget,
 .monaco-editor-sticky-scroll {
+  background-color: var(--bg-main) !important;
+}
+
+/* React Syntax Highlighter Background Overrides */
+.dark pre[class*="language-"] {
   background: #000000 !important;
 }
 
-/* React Syntax Highlighter Background Override */
-pre[class*="language-"] {
-  background: #000000 !important;
+.light pre[class*="language-"] {
+  background: #f8fafc !important;
+}
+
+/* Scrollbar theme mapping */
+::-webkit-scrollbar-thumb {
+  background: var(--border-col);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-sec);
 }

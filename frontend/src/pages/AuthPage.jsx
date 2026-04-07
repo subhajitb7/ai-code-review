@@ -46,11 +46,11 @@ const AuthPage = () => {
     <div className="flex-1 flex items-center justify-center p-6 relative">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="glass-panel w-full max-w-md p-8 z-10 mt-10">
-        <h2 className="text-3xl font-bold text-center mb-2">
+      <div className="glass-panel w-full max-w-md p-8 z-10 mt-10 shadow-2xl">
+        <h2 className="text-3xl font-bold text-center mb-2 text-main">
           {isLogin ? 'Welcome Back' : 'Create an Account'}
         </h2>
-        <p className="text-gray-400 text-center mb-8">
+        <p className="text-sec font-medium text-center mb-8">
           {isLogin ? 'Sign in to continue to AICodeReview' : 'Get started with AI code reviews today'}
         </p>
 
@@ -63,18 +63,18 @@ const AuthPage = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {!isLogin && (
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-300">Full Name</label>
+              <label className="text-sm font-bold text-sec">Full Name</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required={!isLogin} className="glass-input" placeholder="John Doe" />
             </div>
           )}
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-300">Email Address</label>
+            <label className="text-sm font-bold text-sec">Email Address</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="glass-input" placeholder="name@example.com" />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-300">Password</label>
+            <label className="text-sm font-bold text-sec">Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
           </div>
 
@@ -91,10 +91,10 @@ const AuthPage = () => {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-400">
+        <div className="mt-6 text-center text-sm text-sec font-medium">
           {isLogin ? "Don't have an account?" : 'Already have an account?'}
           <button type="button" onClick={() => { setIsLogin(!isLogin); setError(null); }}
-            className="ml-2 text-primary-400 hover:text-primary-300 transition-colors font-medium border-b border-transparent hover:border-primary-300">
+            className="ml-2 text-primary-600 hover:text-primary-700 transition-colors font-bold border-b border-transparent hover:border-primary-700">
             {isLogin ? 'Sign Up' : 'Sign In'}
           </button>
         </div>

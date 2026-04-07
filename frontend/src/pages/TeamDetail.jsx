@@ -84,9 +84,9 @@ const TeamDetail = () => {
   };
 
   const roleIcon = (role) => {
-    if (role === 'owner') return <Crown className="h-3.5 w-3.5 text-yellow-400" />;
-    if (role === 'admin') return <ShieldCheck className="h-3.5 w-3.5 text-primary-400" />;
-    return <UserIcon className="h-3.5 w-3.5 text-gray-500" />;
+    if (role === 'owner') return <Crown className="h-3.5 w-3.5 text-yellow-600" />;
+    if (role === 'admin') return <ShieldCheck className="h-3.5 w-3.5 text-primary-600" />;
+    return <UserIcon className="h-3.5 w-3.5 text-sec" />;
   };
 
   if (loading) {
@@ -97,22 +97,22 @@ const TeamDetail = () => {
     );
   }
 
-  if (!team) return <div className="text-center py-20 text-gray-400">Team not found.</div>;
+  if (!team) return <div className="text-center py-20 text-sec font-medium">Team not found.</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <Link to="/teams" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 text-sm">
+      <Link to="/teams" className="flex items-center gap-2 text-sec hover:text-main font-medium transition-colors mb-6 text-sm">
         <ArrowLeft className="h-4 w-4" /> Back to Teams
       </Link>
 
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-            <Users className="h-6 w-6 text-purple-400" />
+            <Users className="h-6 w-6 text-purple-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">{team.name}</h1>
-            <p className="text-gray-400 text-sm mt-1">{team.description || 'No description'}</p>
+            <h1 className="text-3xl font-bold text-main">{team.name}</h1>
+            <p className="text-sec text-sm mt-1 font-medium">{team.description || 'No description'}</p>
           </div>
         </div>
         {canManage && (
@@ -130,23 +130,23 @@ const TeamDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Members */}
         <div className="glass-panel p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary-400" /> Members ({team.members?.length || 0})
+          <h2 className="text-lg font-bold text-main mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary-600" /> Members ({team.members?.length || 0})
           </h2>
           <div className="space-y-2">
             {team.members?.map((m) => (
-              <div key={m.user?._id} className="flex items-center justify-between p-3 bg-dark-900/50 border border-dark-600 rounded-lg">
+              <div key={m.user?._id} className="flex items-center justify-between p-3 bg-sec border border-col rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-primary-500/10 flex items-center justify-center text-sm font-bold text-primary-400">
+                  <div className="h-9 w-9 rounded-full bg-primary-500/10 flex items-center justify-center text-sm font-bold text-primary-600">
                     {m.user?.name?.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{m.user?.name}</span>
+                      <span className="font-bold text-sm text-main">{m.user?.name}</span>
                       {roleIcon(m.role)}
-                      <span className="text-[10px] text-gray-500 uppercase">{m.role}</span>
+                      <span className="text-[10px] text-sec font-bold uppercase tracking-wider">{m.role}</span>
                     </div>
-                    <p className="text-xs text-gray-500">{m.user?.email}</p>
+                    <p className="text-xs text-sec font-medium">{m.user?.email}</p>
                   </div>
                 </div>
                 {canManage && m.role !== 'owner' && (
@@ -154,13 +154,13 @@ const TeamDetail = () => {
                     <select
                       value={m.role}
                       onChange={(e) => handleRoleChange(m.user?._id, e.target.value)}
-                      className="text-xs bg-dark-800 border border-dark-600 rounded px-2 py-1 text-gray-300"
+                      className="text-xs bg-ter border border-col rounded px-2 py-1 text-main font-medium cursor-pointer"
                     >
                       <option value="member">Member</option>
                       <option value="admin">Admin</option>
                     </select>
                     <button onClick={() => handleRemove(m.user?._id)}
-                      className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors">
+                      className="p-1.5 text-sec hover:text-red-500 hover:bg-red-500/10 rounded transition-colors">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -172,20 +172,20 @@ const TeamDetail = () => {
 
         {/* Projects */}
         <div className="glass-panel p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <FolderOpen className="h-5 w-5 text-primary-400" /> Projects ({team.projects?.length || 0})
+          <h2 className="text-lg font-bold text-main mb-4 flex items-center gap-2">
+            <FolderOpen className="h-5 w-5 text-primary-600" /> Projects ({team.projects?.length || 0})
           </h2>
           {!team.projects || team.projects.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center py-8">No projects linked yet.</p>
+            <p className="text-sec font-medium text-sm text-center py-8">No projects linked yet.</p>
           ) : (
             <div className="space-y-2">
               {team.projects.map((p) => (
                 <Link key={p._id} to={`/projects/${p._id}`}
-                  className="flex items-center gap-3 p-3 bg-dark-900/50 border border-dark-600 rounded-lg hover:border-primary-500/50 transition-all">
-                  <FolderOpen className="h-5 w-5 text-gray-400" />
+                  className="flex items-center gap-3 p-3 bg-sec border border-col rounded-lg hover:border-primary-500/50 hover:shadow-lg transition-all">
+                  <FolderOpen className="h-5 w-5 text-sec" />
                   <div>
-                    <p className="font-medium text-sm">{p.name}</p>
-                    <p className="text-xs text-gray-500">{p.language}</p>
+                    <p className="font-bold text-sm text-main">{p.name}</p>
+                    <p className="text-xs text-sec font-medium">{p.language}</p>
                   </div>
                 </Link>
               ))}
@@ -197,12 +197,12 @@ const TeamDetail = () => {
       {/* Invite Modal */}
       {showInvite && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-panel w-full max-w-md p-8 relative">
-            <button onClick={() => { setShowInvite(false); setError(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <div className="glass-panel w-full max-w-md p-8 relative shadow-2xl">
+            <button onClick={() => { setShowInvite(false); setError(null); }} className="absolute top-4 right-4 text-sec hover:text-main">
               <X className="h-5 w-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-2">Invite Member</h2>
-            <p className="text-gray-400 text-sm mb-6">Enter the email of a registered user.</p>
+            <h2 className="text-2xl font-bold text-main mb-2">Invite Member</h2>
+            <p className="text-sec text-sm mb-6 font-medium">Enter the email of a registered user.</p>
             {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-4 text-sm">{error}</div>}
             <form onSubmit={handleInvite} className="flex flex-col gap-4">
               <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} required className="glass-input" placeholder="user@example.com" />
@@ -215,22 +215,22 @@ const TeamDetail = () => {
       {/* Link Project Modal */}
       {showLinkProject && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-panel w-full max-w-md p-8 relative">
-            <button onClick={() => setShowLinkProject(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <div className="glass-panel w-full max-w-md p-8 relative shadow-2xl">
+            <button onClick={() => setShowLinkProject(false)} className="absolute top-4 right-4 text-sec hover:text-main">
               <X className="h-5 w-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-6">Link Project</h2>
+            <h2 className="text-2xl font-bold text-main mb-6">Link Project</h2>
             {myProjects.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No projects found. Create one first.</p>
+              <p className="text-sec text-center font-medium py-4">No projects found. Create one first.</p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {myProjects.map((p) => (
                   <button key={p._id} onClick={() => handleLinkProject(p._id)}
-                    className="w-full text-left p-3 bg-dark-900/50 border border-dark-600 rounded-lg hover:border-primary-500/50 transition-all flex items-center gap-3">
-                    <FolderOpen className="h-5 w-5 text-gray-400" />
+                    className="w-full text-left p-3 bg-sec border border-col rounded-lg hover:border-primary-500/50 hover:shadow-lg transition-all flex items-center gap-3 group">
+                    <FolderOpen className="h-5 w-5 text-sec group-hover:text-primary-600 transition-colors" />
                     <div>
-                      <p className="font-medium text-sm">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.language}</p>
+                      <p className="font-bold text-sm text-main">{p.name}</p>
+                      <p className="text-xs text-sec font-medium">{p.language}</p>
                     </div>
                   </button>
                 ))}

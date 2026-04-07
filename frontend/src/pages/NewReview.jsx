@@ -8,7 +8,8 @@ import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
 import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
 import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { ThemeContext } from '../context/ThemeContext';
 import { AlertTriangle, CheckCircle, Loader2, Send, Code, Sparkles } from 'lucide-react';
 
 SyntaxHighlighter.registerLanguage('jsx', jsx);
@@ -19,6 +20,7 @@ import Editor from '@monaco-editor/react';
 
 
 const NewReview = () => {
+  const { theme } = useContext(ThemeContext);
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('javascript');
   const [codeSnippet, setCodeSnippet] = useState('');
@@ -85,8 +87,8 @@ const NewReview = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
-      <div className="border-b border-dark-700 bg-dark-800 p-4">
+    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-main">
+      <div className="border-b border-col bg-sec p-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex w-full sm:w-auto items-center gap-4 flex-1">
              <input
@@ -94,7 +96,7 @@ const NewReview = () => {
                placeholder="Review Title (e.g. Authentication Bug)"
                value={title}
                onChange={(e) => setTitle(e.target.value)}
-               className="glass-input flex-1 sm:max-w-xs"
+               className="glass-input flex-1 sm:max-w-xs font-bold"
              />
              <select
                value={language}
@@ -125,18 +127,18 @@ const NewReview = () => {
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Side - Editor */}
-        <div className={`flex-1 flex flex-col ${result ? 'lg:w-1/2 border-r border-dark-700' : 'w-full'} transition-all`}>
-          <div className="bg-dark-800 border-b border-dark-700 px-4 py-2 flex justify-between items-center">
-             <div className="flex items-center gap-2 text-sm text-gray-400 font-medium">
+        <div className={`flex-1 flex flex-col ${result ? 'lg:w-1/2 border-r border-col' : 'w-full'} transition-all`}>
+          <div className="bg-sec border-b border-col px-4 py-2 flex justify-between items-center">
+             <div className="flex items-center gap-2 text-sm text-sec font-bold uppercase tracking-wider">
                <Code className="h-4 w-4" />
                Source Code
              </div>
           </div>
-          <div className="flex-1 bg-black relative">
+          <div className="flex-1 bg-main relative">
              <Editor
                height="100%"
                language={language}
-               theme="vs-dark"
+               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                value={codeSnippet}
                onChange={(value) => setCodeSnippet(value || '')}
                options={{
@@ -152,33 +154,33 @@ const NewReview = () => {
 
         {/* Right Side - Results */}
         {(result || error || loading) && (
-          <div className="flex-1 flex flex-col lg:w-1/2 bg-dark-800/30 overflow-hidden relative">
-            <div className="bg-dark-800 border-b border-dark-700 px-4 py-2 flex justify-between items-center shadow-sm">
-               <div className="flex items-center gap-2 text-sm font-medium text-emerald-400">
+          <div className="flex-1 flex flex-col lg:w-1/2 bg-ter/30 overflow-hidden relative">
+            <div className="bg-sec border-b border-col px-4 py-2 flex justify-between items-center shadow-sm">
+               <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 uppercase tracking-wider">
                  <Sparkles className="h-4 w-4" />
                  AI Analysis Results
                </div>
                {result && (
-                  <div className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${result.bugsFound > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+                  <div className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 ${result.bugsFound > 0 ? 'bg-red-500/20 text-red-600 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/30'}`}>
                     {result.bugsFound > 0 ? <><AlertTriangle className="h-3 w-3" /> Issues Detected</> : <><CheckCircle className="h-3 w-3" /> Looks Good</>}
                   </div>
                )}
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-main">
                {loading && (
-                 <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
+                 <div className="flex flex-col items-center justify-center h-full text-sec gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-                    <p className="animate-pulse">{aiProgressText}</p>
+                    <p className="animate-pulse font-bold">{aiProgressText}</p>
                  </div>
                )}
 
                {error && (
-                 <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-400 flex items-start gap-3">
+                 <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-red-600 flex items-start gap-3">
                    <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
                    <div>
-                     <h4 className="font-semibold mb-1">Analysis Failed</h4>
-                     <p className="text-sm opacity-90">{error}</p>
+                     <h4 className="font-bold mb-1">Analysis Failed</h4>
+                     <p className="text-sm font-medium">{error}</p>
                    </div>
                  </div>
                )}

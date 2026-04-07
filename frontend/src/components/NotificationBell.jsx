@@ -74,17 +74,17 @@ const NotificationBell = () => {
   };
 
   const typeColors = {
-    review_complete: 'text-emerald-400',
-    new_comment: 'text-primary-400',
-    file_updated: 'text-yellow-400',
-    project_created: 'text-purple-400',
+    review_complete: 'text-emerald-600',
+    new_comment: 'text-primary-600',
+    file_updated: 'text-yellow-600',
+    project_created: 'text-purple-600',
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
+        className="relative p-2 text-sec hover:text-main hover:bg-sec rounded-lg transition-colors border border-transparent hover:border-col shadow-sm"
       >
         <Bell className="h-5 w-5" />
         {data.unreadCount > 0 && (
@@ -96,10 +96,10 @@ const NotificationBell = () => {
 
       {open && (
         <div className="absolute right-0 mt-2 w-80 glass-panel shadow-2xl z-50 overflow-hidden">
-          <div className="flex items-center justify-between p-3 border-b border-dark-700">
-            <span className="font-semibold text-sm">Notifications</span>
+          <div className="flex items-center justify-between p-3 border-b border-col bg-ter/50">
+            <span className="font-bold text-sm text-main">Notifications</span>
             {data.unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="text-xs text-primary-400 hover:text-primary-300 transition-colors">
+              <button onClick={handleMarkAllRead} className="text-xs text-primary-600 hover:text-primary-700 transition-colors font-bold">
                 Mark all read
               </button>
             )}
@@ -112,9 +112,9 @@ const NotificationBell = () => {
                 <button
                   key={notif._id}
                   onClick={() => handleClick(notif)}
-                  className={`w-full text-left p-3 border-b border-dark-700/50 hover:bg-dark-700/50 transition-colors ${!notif.read ? 'bg-dark-800' : ''}`}
+                  className={`w-full text-left p-3 border-b border-col/50 hover:bg-ter transition-colors ${!notif.read ? 'bg-primary-500/5' : ''}`}
                 >
-                  <p className={`text-sm ${!notif.read ? 'text-white font-medium' : 'text-gray-400'}`}>{notif.message}</p>
+                  <p className={`text-sm ${!notif.read ? 'text-main font-bold' : 'text-sec font-medium'}`}>{notif.message}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-xs capitalize ${typeColors[notif.type] || 'text-gray-500'}`}>
                       {notif.type.replace('_', ' ')}

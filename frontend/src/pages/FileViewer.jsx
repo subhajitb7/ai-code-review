@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Sparkles, Loader2, Clock, GitBranch } from 'lucide-react';
@@ -16,6 +17,7 @@ SyntaxHighlighter.registerLanguage('python', python);
 SyntaxHighlighter.registerLanguage('typescript', typescript);
 import Editor from '@monaco-editor/react';
 const FileViewer = () => {
+  const { theme } = useContext(ThemeContext);
   const { id: projectId, fileId } = useParams();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -103,27 +105,27 @@ const FileViewer = () => {
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
       {/* Header */}
-      <div className="border-b border-dark-700 bg-dark-800 p-4">
+      <div className="border-b border-col bg-sec p-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to={`/projects/${projectId}`} className="text-gray-400 hover:text-white transition-colors">
+            <Link to={`/projects/${projectId}`} className="text-sec hover:text-main transition-colors font-medium">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
               <h1 className="font-bold text-lg">{file.filename}</h1>
-              <p className="text-xs text-gray-500">v{file.currentVersion} · {file.language}</p>
+              <p className="text-xs text-sec">v{file.currentVersion} · {file.language}</p>
             </div>
           </div>
           <div className="flex gap-3">
             {!isEditing ? (
               <>
-                <button onClick={fetchHistory} className="btn-secondary flex items-center gap-2 text-sm">
+                <button onClick={fetchHistory} className="btn-secondary flex items-center gap-2 text-sm font-bold">
                   <GitBranch className="h-4 w-4" /> History
                 </button>
-                <button onClick={() => setIsEditing(true)} className="btn-secondary border-primary-500/30 text-primary-400 flex items-center gap-2 text-sm">
+                <button onClick={() => setIsEditing(true)} className="btn-secondary border-primary-500/30 text-primary-600 flex items-center gap-2 text-sm font-bold">
                    Edit File
                 </button>
-                <button onClick={handleReview} disabled={reviewing} className="btn-primary flex items-center gap-2 text-sm disabled:opacity-50">
+                <button onClick={handleReview} disabled={reviewing} className="btn-primary flex items-center gap-2 text-sm disabled:opacity-50 font-bold">
                   {reviewing ? <><Loader2 className="h-4 w-4 animate-spin" /> Reviewing...</> : <><Sparkles className="h-4 w-4" /> AI Review</>}
                 </button>
               </>
@@ -142,12 +144,12 @@ const FileViewer = () => {
       {/* Content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Code Viewer */}
-        <div className={`flex-1 ${reviewResult ? 'lg:w-1/2 border-r border-dark-700' : 'w-full'}`}>
-           <div className="bg-black h-full">
+        <div className={`flex-1 ${reviewResult ? 'lg:w-1/2 border-r border-col' : 'w-full'}`}>
+           <div className="bg-main h-full">
              <Editor
                height="100%"
                language={file.language}
-               theme="vs-dark"
+               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                value={editedContent}
                onChange={(val) => setEditedContent(val || '')}
                options={{
@@ -164,8 +166,8 @@ const FileViewer = () => {
 
         {/* Review Results */}
         {reviewResult && (
-          <div className="flex-1 lg:w-1/2 overflow-y-auto bg-dark-800/30 p-6">
-            <h3 className="text-lg font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+          <div className="flex-1 lg:w-1/2 overflow-y-auto bg-ter/30 p-6">
+            <h3 className="text-lg font-bold text-emerald-600 mb-4 flex items-center gap-2">
               <Sparkles className="h-5 w-5" /> AI Review Result
             </h3>
             <div className="ai-feedback-content">
@@ -176,8 +178,8 @@ const FileViewer = () => {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
                       <SyntaxHighlighter
-                        style={vscDarkPlus}
-                        customStyle={{ background: '#000000' }}
+                        style={theme === 'dark' ? vscDarkPlus : undefined}
+                        customStyle={{ background: 'transparent' }}
                         language={match[1]}
                         PreTag="div"
                         className="rounded-md my-4 text-sm"
@@ -203,21 +205,21 @@ const FileViewer = () => {
       {/* Version History Sidebar */}
       {showHistory && history && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-end z-50">
-          <div className="glass-panel w-96 h-full p-6 overflow-y-auto border-l border-dark-600">
+          <div className="glass-panel w-96 h-full p-6 overflow-y-auto border-l border-col shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2"><Clock className="h-5 w-5 text-primary-400" /> Version History</h3>
-              <button onClick={() => setShowHistory(false)} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+              <h3 className="text-xl font-bold flex items-center gap-2 text-main"><Clock className="h-5 w-5 text-primary-600" /> Version History</h3>
+              <button onClick={() => setShowHistory(false)} className="text-sec hover:text-main text-2xl transition-colors">&times;</button>
             </div>
             <div className="space-y-3">
               {history.versions.slice().reverse().map((v) => (
-                <div key={v._id} className={`p-4 rounded-lg border transition-colors ${v.versionNumber === history.currentVersion ? 'border-primary-500 bg-primary-500/10' : 'border-dark-600 bg-dark-900/50'}`}>
+                <div key={v._id} className={`p-4 rounded-lg border transition-all ${v.versionNumber === history.currentVersion ? 'border-primary-500 bg-primary-500/10 shadow-sm' : 'border-col bg-ter/50 hover:bg-ter'}`}>
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">Version {v.versionNumber}</span>
+                    <span className="font-bold text-main">Version {v.versionNumber}</span>
                     {v.versionNumber === history.currentVersion && (
-                      <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-0.5 rounded border border-primary-500/30">Current</span>
+                      <span className="text-[10px] bg-primary-500/20 text-primary-600 px-2 py-0.5 rounded border border-primary-500/30 font-bold uppercase tracking-wider">Current</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(v.updatedAt).toLocaleString()}</p>
+                  <p className="text-[10px] text-sec mt-1 font-bold">{new Date(v.updatedAt).toLocaleString()}</p>
                 </div>
               ))}
             </div>

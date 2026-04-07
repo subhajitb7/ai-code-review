@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
 import { 
   BarChart as ReBarChart, 
   Bar, 
@@ -13,11 +14,11 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-panel p-3 border border-dark-600 backdrop-blur-md shadow-2xl">
-        <p className="text-xs text-gray-400 mb-1 font-mono uppercase tracking-wider font-semibold capitalize">{label}</p>
+      <div className="glass-panel p-3 border border-col backdrop-blur-md shadow-2xl">
+        <p className="text-xs text-sec mb-1 font-mono uppercase tracking-wider font-semibold capitalize">{label}</p>
         <div className="space-y-1">
-          <p className="text-sm font-bold text-white">
-            {payload[0].value} <span className="text-xs text-gray-400 font-normal">Reviews</span>
+          <p className="text-sm font-bold text-main">
+            {payload[0].value} <span className="text-xs text-sec font-normal">Reviews</span>
           </p>
           <p className="text-xs text-red-400 font-medium font-mono uppercase">
              · {payload[0].payload.bugs} bugs found
@@ -30,6 +31,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const BarChart = ({ data }) => {
+  const { theme } = useContext(ThemeContext);
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0';
+  const tickColor = theme === 'dark' ? '#64748b' : '#94a3b8';
+  const labelColor = theme === 'dark' ? '#e2e8f0' : '#0f172a';
+  const cursorColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
   const colors = {
     javascript: '#f59e0b',
     python: '#3b82f6',
@@ -51,24 +58,24 @@ const BarChart = ({ data }) => {
             strokeDasharray="3 3" 
             horizontal={true} 
             vertical={false} 
-            stroke="#1e293b" 
+            stroke={gridColor} 
           />
           <XAxis 
             type="number" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#64748b', fontSize: 10 }}
+            tick={{ fill: tickColor, fontSize: 10 }}
           />
           <YAxis 
             dataKey="_id" 
             type="category" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#e2e8f0', fontSize: 11, fontWeight: 'bold' }}
+            tick={{ fill: labelColor, fontSize: 11, fontWeight: 'bold' }}
             width={80}
             className="capitalize"
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: cursorColor }} />
           <Bar
             dataKey="count"
             radius={[0, 4, 4, 0]}

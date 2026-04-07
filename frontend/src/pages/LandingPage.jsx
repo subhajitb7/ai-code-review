@@ -17,19 +17,19 @@ const LandingPage = () => {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="text-center z-10 max-w-4xl max-auto mt-10 sm:mt-20">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-dark-600 bg-dark-800/50 backdrop-blur-md mb-8">
-          <Sparkles className="h-4 w-4 text-primary-400" />
-          <span className="text-sm text-gray-300">Powered by advanced AI models</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-col bg-sec/50 backdrop-blur-md mb-8 shadow-sm">
+          <Sparkles className="h-4 w-4 text-primary-500" />
+          <span className="text-sm text-sec font-bold">Powered by advanced AI models</span>
         </div>
         
-        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+        <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 leading-tight text-main">
           Code reviews, <br />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-purple-400">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600">
             supercharged by AI
           </span>
         </h1>
         
-        <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+        <p className="text-xl text-sec mb-10 max-w-2xl mx-auto font-medium">
           Automate your code review process. Detect vulnerabilities, squash bugs, and receive intelligent suggestions in real-time.
         </p>
         
@@ -46,30 +46,30 @@ const LandingPage = () => {
 
       {/* Feature Section */}
       <div id="features" className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full mt-32 z-10">
-        <div className="glass-panel p-8 text-left hover:border-primary-500/50 transition-colors">
+        <div className="glass-panel p-8 text-left hover:border-primary-500/50 transition-colors shadow-lg">
           <div className="h-12 w-12 bg-primary-500/10 rounded-xl flex items-center justify-center mb-6">
-            <Zap className="h-6 w-6 text-primary-400" />
+            <Zap className="h-6 w-6 text-primary-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3">Instant Feedback</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-bold mb-3 text-main">Instant Feedback</h3>
+          <p className="text-sec leading-relaxed font-medium">
             Get lightning-fast code analysis directly in your browser. No complex CI/CD setup required for the MVP.
           </p>
         </div>
-        <div className="glass-panel p-8 text-left hover:border-purple-500/50 transition-colors">
+        <div className="glass-panel p-8 text-left hover:border-purple-500/50 transition-colors shadow-lg">
           <div className="h-12 w-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-6">
-            <Sparkles className="h-6 w-6 text-purple-400" />
+            <Sparkles className="h-6 w-6 text-purple-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3">AI Suggestions</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-bold mb-3 text-main">AI Suggestions</h3>
+          <p className="text-sec leading-relaxed font-medium">
             Our AI not only finds bugs but suggests optimal rewrites to improve performance and readability.
           </p>
         </div>
-        <div className="glass-panel p-8 text-left hover:border-emerald-500/50 transition-colors">
+        <div className="glass-panel p-8 text-left hover:border-emerald-500/50 transition-colors shadow-lg">
           <div className="h-12 w-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6">
-            <ShieldCheck className="h-6 w-6 text-emerald-400" />
+            <ShieldCheck className="h-6 w-6 text-emerald-600" />
           </div>
-          <h3 className="text-xl font-bold mb-3">Security First</h3>
-          <p className="text-gray-400 leading-relaxed">
+          <h3 className="text-xl font-bold mb-3 text-main">Security First</h3>
+          <p className="text-sec leading-relaxed font-medium">
             Detect common vulnerabilities before they make it to production. Ensure your codebase remains secure.
           </p>
         </div>

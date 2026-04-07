@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import hljs from 'highlight.js';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FileCode, Plus, FolderOpen, ArrowLeft, X, Upload, Trash2 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
+import { ThemeContext } from '../context/ThemeContext';
 const ProjectDetail = () => {
+  const { theme } = useContext(ThemeContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -105,28 +107,28 @@ const ProjectDetail = () => {
   }
 
   if (!project) {
-    return <div className="text-center py-20 text-gray-400">Project not found.</div>;
+    return <div className="text-center py-20 text-sec font-medium">Project not found.</div>;
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <Link to="/projects" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 text-sm">
+      <Link to="/projects" className="flex items-center gap-2 text-sec hover:text-main font-medium transition-colors mb-6 text-sm">
         <ArrowLeft className="h-4 w-4" /> Back to Projects
       </Link>
 
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-            <FolderOpen className="h-6 w-6 text-primary-400" />
+            <FolderOpen className="h-6 w-6 text-primary-500" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            <p className="text-gray-400 text-sm mt-1">{project.description || 'No description'} · <span className="uppercase text-primary-400">{project.language}</span></p>
+            <h1 className="text-3xl font-bold text-main">{project.name}</h1>
+            <p className="text-sec text-sm mt-1 font-medium">{project.description || 'No description'} · <span className="uppercase text-primary-600 font-bold">{project.language}</span></p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {project.canDelete && (
-            <button onClick={handleDeleteProject} className="btn-secondary border-red-500/30 text-red-400 hover:bg-red-400/10 flex items-center gap-2">
+            <button onClick={handleDeleteProject} className="btn-secondary border-red-500/30 text-red-600 hover:bg-red-500/10 flex items-center gap-2 font-bold">
               <Trash2 className="h-4 w-4" /> Delete Project
             </button>
           )}
@@ -137,12 +139,12 @@ const ProjectDetail = () => {
       </div>
 
       <div className="glass-panel p-6">
-        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-          <FileCode className="h-5 w-5 text-primary-400" /> Files
+        <h2 className="text-xl font-bold text-main mb-6 flex items-center gap-2">
+          <FileCode className="h-5 w-5 text-primary-500" /> Files
         </h2>
         {!project.files || project.files.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 mb-4">No files uploaded yet.</p>
+            <p className="text-sec font-medium mb-4">No files uploaded yet.</p>
             <button onClick={() => setShowUpload(true)} className="btn-secondary">Upload First File</button>
           </div>
         ) : (
@@ -151,16 +153,16 @@ const ProjectDetail = () => {
               <Link
                 key={file._id}
                 to={`/projects/${id}/files/${file._id}`}
-                className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-600 rounded-lg hover:border-primary-500/50 transition-all"
+                className="flex items-center justify-between p-4 bg-sec border border-col rounded-lg hover:border-primary-500/50 hover:shadow-lg transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <FileCode className="h-5 w-5 text-gray-400" />
+                  <FileCode className="h-5 w-5 text-sec" />
                   <div>
-                    <p className="font-medium">{file.filename}</p>
-                    <p className="text-xs text-gray-500">v{file.currentVersion} · {file.language}</p>
+                    <p className="font-bold text-main">{file.filename}</p>
+                    <p className="text-xs text-sec font-medium">v{file.currentVersion} · <span className="uppercase">{file.language}</span></p>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500">{new Date(file.createdAt).toLocaleDateString()}</span>
+                <span className="text-xs text-sec font-medium">{new Date(file.createdAt).toLocaleDateString()}</span>
               </Link>
             ))}
           </div>
@@ -170,16 +172,16 @@ const ProjectDetail = () => {
       {/* Upload File Modal */}
       {showUpload && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-panel w-full max-w-2xl p-8 relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setShowUpload(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <div className="glass-panel w-full max-w-4xl p-8 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+            <button onClick={() => setShowUpload(false)} className="absolute top-4 right-4 text-sec hover:text-main">
               <X className="h-5 w-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-6">Upload File</h2>
+            <h2 className="text-2xl font-bold text-main mb-6">Upload File</h2>
 
-            <div className="mb-4 p-4 border-2 border-dashed border-dark-600 rounded-lg text-center hover:border-primary-500/50 transition-colors cursor-pointer">
+            <div className="mb-4 p-6 border-2 border-dashed border-col rounded-lg text-center bg-ter/30 hover:border-primary-500/50 transition-all cursor-pointer">
               <label className="cursor-pointer flex flex-col items-center gap-2">
-                <Upload className="h-8 w-8 text-gray-400" />
-                <span className="text-sm text-gray-400">Click to browse a file, or paste code below</span>
+                <Upload className="h-8 w-8 text-primary-500" />
+                <span className="text-sm font-bold text-sec">Click to browse a file, or paste code below</span>
                 <input type="file" onChange={handleFileRead} className="hidden" accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.go,.html,.css,.json,.md" />
               </label>
             </div>
@@ -187,11 +189,11 @@ const ProjectDetail = () => {
             <form onSubmit={handleUpload} className="flex flex-col gap-5">
               <div className="flex gap-4">
                 <div className="flex flex-col gap-2 flex-1">
-                  <label className="text-sm font-medium text-gray-300">Filename</label>
+                  <label className="text-sm font-bold text-sec">Filename</label>
                   <input type="text" value={fileForm.filename} onChange={(e) => setFileForm({ ...fileForm, filename: e.target.value })} required className="glass-input" placeholder="app.js" />
                 </div>
-                <div className="flex flex-col gap-2 w-40">
-                  <label className="text-sm font-medium text-gray-300">Language</label>
+                <div className="flex flex-col gap-2 w-48">
+                  <label className="text-sm font-bold text-sec">Language</label>
                   <select value={fileForm.language} onChange={(e) => setFileForm({ ...fileForm, language: e.target.value })} className="glass-input">
                     <option value="javascript">JavaScript</option>
                     <option value="python">Python</option>
@@ -203,12 +205,12 @@ const ProjectDetail = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-300">Code Content</label>
-                <div className="h-64 border border-dark-600 rounded-lg overflow-hidden bg-black">
+                <label className="text-sm font-bold text-sec">Code Content</label>
+                <div className="h-80 border border-col rounded-lg overflow-hidden bg-main">
                   <Editor
                     height="100%"
                     language={fileForm.language}
-                    theme="vs-dark"
+                    theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                     value={fileForm.content}
                     onChange={(value) => setFileForm({ ...fileForm, content: value || '' })}
                     options={{
