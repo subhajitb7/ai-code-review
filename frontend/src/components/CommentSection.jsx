@@ -212,10 +212,10 @@ const CommentSection = ({
       {/* Input */}
       <form onSubmit={handleSubmit} className="relative group">
         <div className="glass-panel p-2 flex flex-col gap-2 border-col group-focus-within:border-primary-500/50 transition-all shadow-xl">
-           <textarea
+            <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={isTodoMode ? "Add a task to your list..." : (placeholder || "Take a note...")}
+            placeholder={isTodoMode ? "Add a task to your list..." : (placeholder || (isNotes ? "Take a note..." : "Start a discussion..."))}
             className="w-full bg-transparent border-none outline-none text-sm font-medium resize-none px-3 py-2 min-h-[44px] max-h-40 text-main"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -236,7 +236,7 @@ const CommentSection = ({
                 }`}
               >
                 <ListTodo className="h-3.5 w-3.5" />
-                {isTodoMode ? 'Task Mode' : 'Note Mode'}
+                {isTodoMode ? 'Task Mode' : (isNotes ? 'Note Mode' : 'Chat Mode')}
               </button>
             </div>
             <button 

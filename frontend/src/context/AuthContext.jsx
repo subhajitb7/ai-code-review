@@ -11,24 +11,23 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const userInfo = localStorage.getItem('userInfo');
-      if (userInfo) {
-        try {
-          const { data } = await axios.get('/api/auth/profile');
-          setUser(data);
-          localStorage.setItem('userInfo', JSON.stringify(data));
-        } catch (error) {
-          console.error('Session sync failed:', error);
-          if (error.response?.status === 401 || error.response?.status === 404) {
-            setUser(null);
-            localStorage.removeItem('userInfo');
-          } else {
-            // Fallback to local storage if server is down but session might be valid
-            setUser(JSON.parse(userInfo));
-          }
+      try {
+        const { data } = await axios.get('/api/auth/profile');
+        setUser(data);
+        localStorage.setItem('userInfo', JSON.stringify(data));
+      } catch (error) {
+        // Only clear if we actually tried and failed with a 401
+        if (error.response?.status === 401 || error.response?.status === 404) {
+          setUser(null);
+          localStorage.removeItem('userInfo');
+        } else {
+          // If server is down/error, fallback to local storage if it exists
+          const userInfo = localStorage.getItem('userInfo');
+          if (userInfo) setUser(JSON.parse(userInfo));
         }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     checkAuth();
   }, []);

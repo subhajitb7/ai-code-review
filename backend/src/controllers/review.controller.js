@@ -45,7 +45,7 @@ export const analyzeCode = async (req, res) => {
           {
             role: 'system',
             content:
-              'You are an expert code reviewer. Analyze the provided code, find any bugs or vulnerabilities, suggest improvements, and give an overall rating out of 10. Format your response clearly in Markdown. Point out specific lines if possible. Count the number of distinct bugs found. Do NOT include a main title/heading like "Code Review" or "Analysis" at the top of your response, just start directly with your observations.',
+              'You are an expert code reviewer. Analyze the provided code, find any bugs or vulnerabilities, suggest improvements, and give an overall rating out of 10. Format your response clearly in Markdown. Point out specific lines if possible. At the very end of your response, strictly include the count of distinct bugs/vulnerabilities found in this format: [ISSUES_COUNT]: X (where X is the number). Do NOT include a main title/heading like "Code Review" or "Analysis" at the top of your response, just start directly with your observations.',
           },
           { role: 'user', content: prompt },
         ],
@@ -83,12 +83,20 @@ export const analyzeCode = async (req, res) => {
     const saveToHistory = req.body.saveToHistory !== false;
 
     let bugsFound = 0;
-    const bugMatch = aiFeedback.match(/(\d+)\s*(?:bug|issue|error|vulnerability)/i);
-    if (bugMatch) {
-      bugsFound = parseInt(bugMatch[1], 10);
-    } else if (aiFeedback.toLowerCase().includes('bug') || aiFeedback.toLowerCase().includes('vulnerability')) {
-      bugsFound = 1;
+    // Priority 1: Structured Tag [ISSUES_COUNT]: X
+    const tagMatch = aiFeedback.match(/\[ISSUES_COUNT\]:\s*(\d+)/i);
+    if (tagMatch) {
+      bugsFound = parseInt(tagMatch[1], 10);
+    } else {
+      // Priority 2: Traditional regex (e.g., "3 bugs found")
+      const bugMatch = aiFeedback.match(/(\d+)\s*(?:bug|issue|error|vulnerability)/i);
+      if (bugMatch) {
+        bugsFound = parseInt(bugMatch[1], 10);
+      }
     }
+    
+    // Remove structured tags from the final feedback shown to user for cleaner UI
+    const finalFeedback = aiFeedback.replace(/\[ISSUES_COUNT\]:\s*\d+/gi, '').trim();
 
     let review = null;
     if (saveToHistory) {
@@ -97,7 +105,7 @@ export const analyzeCode = async (req, res) => {
         title,
         codeSnippet,
         language,
-        aiFeedback,
+        aiFeedback: finalFeedback,
         bugsFound,
       });
 
@@ -120,7 +128,7 @@ export const analyzeCode = async (req, res) => {
         title: (title || 'Untitled Review') + ' (Unsaded Session)',
         codeSnippet,
         language,
-        aiFeedback,
+        aiFeedback: finalFeedback,
         bugsFound,
         status: 'Unsaved',
         isTemporary: true,

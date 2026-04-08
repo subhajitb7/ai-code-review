@@ -40,39 +40,6 @@ const ReviewDetail = () => {
     fetchReview();
   }, [id]);
 
-  useEffect(() => {
-    if (socket && id) {
-      const handleStatusUpdated = (newStatus) => {
-        setReview((prev) => (prev ? { ...prev, status: newStatus } : prev));
-      };
-      
-      socket.on('statusUpdated', handleStatusUpdated);
-
-      return () => {
-        socket.off('statusUpdated', handleStatusUpdated);
-      };
-    }
-  }, [socket, id]);
-
-  const handleStatusChange = async (e) => {
-    const newStatus = e.target.value;
-    // Optimistic UI update
-    setReview(prev => prev ? { ...prev, status: newStatus } : prev);
-    try {
-      await axios.patch(`/api/reviews/${id}/status`, { status: newStatus });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin h-8 w-8 border-2 border-primary-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
   if (!review) return <div className="text-center py-20 text-gray-400">Review not found.</div>;
 
   return (
@@ -84,23 +51,7 @@ const ReviewDetail = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{review.title}</h1>
-            <select 
-               value={review.status || 'Pending'} 
-               onChange={handleStatusChange}
-               className={`text-xs font-semibold px-2.5 py-1 rounded-md outline-none bg-sec border cursor-pointer ${
-                 review.status === 'Approved' ? 'border-emerald-500/30 text-emerald-500' :
-                 review.status === 'Needs Changes' ? 'border-red-500/30 text-red-500' :
-                 'border-yellow-500/30 text-yellow-600'
-               }`}
-            >
-               <option value="Pending" className="bg-main text-main">Pending</option>
-               <option value="In Review" className="bg-main text-main">In Review</option>
-               <option value="Needs Changes" className="bg-main text-main">Needs Changes</option>
-               <option value="Approved" className="bg-main text-main">Approved</option>
-            </select>
-          </div>
+          <h1 className="text-3xl font-bold">{review.title}</h1>
           <p className="text-sec text-sm mt-1">
             <span className="uppercase text-primary-500 font-semibold">{review.language}</span> · {new Date(review.createdAt).toLocaleString()}
           </p>
