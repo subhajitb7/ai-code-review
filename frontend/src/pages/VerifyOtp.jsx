@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 
 const VerifyOtp = () => {
+  const { setUser } = useContext(AuthContext);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -63,7 +65,8 @@ const VerifyOtp = () => {
       if (data.mustUpdatePassword) {
         navigate('/security-update');
       } else {
-        window.location.href = '/dashboard'; 
+        setUser(data);
+        navigate('/dashboard'); 
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');

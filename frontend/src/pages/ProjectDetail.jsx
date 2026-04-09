@@ -73,9 +73,9 @@ const ProjectDetail = () => {
 
   useEffect(() => { fetchProject(); }, [id]);
 
-  // Subscribe to Real-Time Pub/Sub
+  // Subscribe to Real-Time Pub/Sub (Only for Team Projects)
   useEffect(() => {
-    if (!id) return;
+    if (!id || !project?.team) return;
     
     const unsubscribe = subscribe(`project:${id}`, (event) => {
       if (event.type === 'NEW_MESSAGE') {
@@ -257,10 +257,20 @@ const ProjectDetail = () => {
                   {project.owner.name}
                 </span>
               )}
+              {!project.team ? (
+                <span className="ml-2 px-3 py-1 bg-sec text-sec rounded-full text-[9px] uppercase font-black tracking-widest border border-col">
+                  Personal Project
+                </span>
+              ) : (
+                <span className="ml-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] uppercase font-black tracking-widest border border-emerald-500/10">
+                   {project.team.name} Team
+                </span>
+              )}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {project.team && (
           <button 
             onClick={() => setChatOpen(true)}
             className="h-12 w-12 bg-sec hover:bg-sec/80 border border-col rounded-xl flex items-center justify-center text-sec hover:text-primary-500 transition-all shadow-sm group relative"
@@ -273,8 +283,9 @@ const ProjectDetail = () => {
               </span>
             )}
           </button>
+          )}
           
-          <div className="h-10 w-[1px] bg-col mx-2 hidden sm:block"></div>
+          {project.team && <div className="h-10 w-[1px] bg-col mx-2 hidden sm:block"></div>}
 
           {project.repoUrl && (
             <button 
@@ -467,6 +478,33 @@ const ProjectDetail = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Real-time Live Toast (Team Only) */}
+      {liveToast && !chatOpen && project.team && (
+        <div 
+          onClick={() => setChatOpen(true)}
+          className="fixed bottom-6 right-6 z-[110] glass-panel p-4 flex items-center gap-4 cursor-pointer hover:scale-105 transition-all shadow-2xl border-primary-500/30 animate-in slide-in-from-right-8 duration-500 max-w-xs"
+        >
+          <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+            <MessageSquare className="h-5 w-5 text-primary-500" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-black text-primary-500 uppercase tracking-widest leading-none mb-1">New Message from {liveToast.user?.name || 'System'}</p>
+            <p className="text-xs text-main font-bold truncate">{liveToast.content}</p>
+          </div>
+        </div>
+      )}
+
+      {project.team && (
+        <ProjectChatDrawer 
+          projectId={id}
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          initialMessages={messages || []}
+          setInitialMessages={setMessages}
+          typingUser={typingUser}
+        />
       )}
     </div>
   );

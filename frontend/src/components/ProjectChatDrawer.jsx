@@ -7,7 +7,7 @@ import {
   Trash2, ListTodo, Plus, Info, Clock, CheckCircle2
 } from 'lucide-react';
 
-const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messages, setInitialMessages: setMessages, typingUser }) => {
+const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messages = [], setInitialMessages: setMessages, typingUser }) => {
   const { user } = useContext(AuthContext);
   const { emitEvent: emit } = useContext(SocketPubSubContext);
   const [text, setText] = useState('');
@@ -69,7 +69,7 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
       {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-[radial-gradient(circle_at_top_right,var(--color-primary-500)_0%,transparent_100%)] bg-[length:200px_200px] bg-no-repeat"
+        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
@@ -157,7 +157,7 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
               }
             }}
             placeholder="Type a message..."
-            className="w-full bg-main border border-col rounded-2xl px-4 py-3 pb-12 text-sm font-medium outline-none focus:border-primary-500/50 transition-all resize-none shadow-inner"
+            className="w-full bg-main border border-col rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-primary-500/50 transition-all resize-none shadow-inner"
             rows={2}
           />
           <div className="absolute bottom-2 right-2 flex items-center gap-2">
@@ -168,14 +168,6 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
             >
               <Send className="h-5 w-5" />
             </button>
-          </div>
-          <div className="absolute bottom-3 left-4 flex items-center gap-4 text-sec">
-             <button type="button" className="hover:text-primary-500 transition-all" title="Attach Code Snip">
-                <Plus className="h-4 w-4" />
-             </button>
-             <button type="button" className="hover:text-primary-500 transition-all" title="Add Task">
-                <ListTodo className="h-4 w-4" />
-             </button>
           </div>
         </form>
         <p className="text-[9px] text-center text-sec mt-4 font-black uppercase tracking-[0.2em] opacity-30">
