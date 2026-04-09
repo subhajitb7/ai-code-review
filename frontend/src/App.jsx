@@ -24,6 +24,7 @@ import AiLogs from './pages/AiLogs';
 import Profile from './pages/Profile';
 import SecurityUpdate from './pages/SecurityUpdate';
 import AiChatFloating from './components/AiChatFloating';
+import Footer from './components/Footer';
 
 // Axios global defaults
 import axios from 'axios';
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
           </Routes>
         </main>
+        {user && <Footer />}
         {user && <AiChatFloating />}
       </div>
     </Router>
