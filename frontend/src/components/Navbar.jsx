@@ -126,74 +126,77 @@ const Navbar = () => {
           </div>
 
           {/* Right: Actions */}
+          {/* Right: Actions */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Theme Toggle - Always Visible */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-sec hover:text-primary-600 hover:bg-primary-500/10 rounded-lg transition-all mr-1"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+
             {user ? (
               <>
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 text-sec hover:text-primary-600 hover:bg-primary-500/10 rounded-lg transition-all"
-                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                  {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                </button>
                 <NotificationBell />
-                  {/* User Profile Dropdown */}
-                  <div className="relative" ref={userMenuRef}>
-                    <button 
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="flex items-center gap-2 ml-1 shrink-0 p-1 rounded-lg hover:bg-sec transition-all"
-                    >
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin
-                          ? 'bg-yellow-500/15 text-yellow-600 ring-1 ring-yellow-500/30'
-                          : 'bg-primary-500/15 text-primary-600'
-                        }`}>
-                        {user.name?.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="hidden xl:block text-left">
-                        <p className="text-sm font-bold text-main leading-tight">{user.name}</p>
-                        <p className={`text-[10px] leading-tight font-medium ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
-                          {isAdmin ? '★ Admin' : 'Member'}
+                {/* User Profile Dropdown */}
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 ml-1 shrink-0 p-1 rounded-lg hover:bg-sec transition-all"
+                  >
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin
+                      ? 'bg-yellow-500/15 text-yellow-600 ring-1 ring-yellow-500/30'
+                      : 'bg-primary-500/15 text-primary-600'
+                      }`}>
+                      {user.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden xl:block text-left">
+                      <p className="text-sm font-bold text-main leading-tight">{user.name}</p>
+                      <p className={`text-[10px] leading-tight font-medium ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
+                        {isAdmin ? '★ Admin' : 'Member'}
+                      </p>
+                    </div>
+                    <ChevronDown className={`h-3 w-3 text-sec transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute top-full mt-3 right-0 w-64 glass-panel shadow-2xl overflow-hidden z-50">
+                      <div className="p-4 border-b border-col bg-sec/30">
+                        <p className="text-sm font-bold text-main truncate leading-tight">{user.name}</p>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
+                          {isAdmin ? 'Administrator' : 'Verified Member'}
                         </p>
                       </div>
-                      <ChevronDown className={`h-3 w-3 text-sec transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {userMenuOpen && (
-                      <div className="absolute top-full mt-3 right-0 w-64 glass-panel shadow-2xl overflow-hidden z-50">
-                        <div className="p-4 border-b border-col bg-sec/30">
-                          <p className="text-sm font-bold text-main truncate leading-tight">{user.name}</p>
-                          <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${isAdmin ? 'text-yellow-600' : 'text-sec'}`}>
-                            {isAdmin ? 'Administrator' : 'Verified Member'}
-                          </p>
-                        </div>
-                        <div className="p-2">
-                          <Link 
-                            to="/profile" 
-                            onClick={() => setUserMenuOpen(false)}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sec hover:text-primary-500 hover:bg-primary-500/10 rounded-lg transition-all font-bold text-sm mb-1"
-                          >
-                            <UserIcon className="h-4 w-4" /> My Profile
-                          </Link>
-                          <button 
-                            onClick={() => { setShowLogoutConfirm(true); setUserMenuOpen(false); }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all font-bold text-sm"
-                          >
-                            <LogOut className="h-4 w-4" /> Sign Out
-                          </button>
-                        </div>
+                      <div className="p-2">
+                        <Link
+                          to="/profile"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sec hover:text-primary-500 hover:bg-primary-500/10 rounded-lg transition-all font-bold text-sm mb-1"
+                        >
+                          <UserIcon className="h-4 w-4" /> My Profile
+                        </Link>
+                        <button
+                          onClick={() => { setShowLogoutConfirm(true); setUserMenuOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all font-bold text-sm"
+                        >
+                          <LogOut className="h-4 w-4" /> Sign Out
+                        </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Mobile menu toggle */}
-                <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-sec hover:text-main transition-colors">
+                <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 text-sec hover:text-main transition-colors">
                   {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
               </>
             ) : (
-              <div className="flex items-center gap-4">
-                <Link to="/auth" className="text-sec hover:text-main transition-colors font-medium">Sign In</Link>
-                <Link to="/auth" className="btn-primary">Get Started</Link>
+              <div className="flex items-center gap-3 sm:gap-4 ml-2">
+                <Link to="/auth" className="text-sm text-sec hover:text-main transition-colors font-bold whitespace-nowrap">Sign In</Link>
+                <Link to="/auth" className="btn-primary px-5 py-2.5 text-sm font-bold shadow-lg shadow-primary-500/20 whitespace-nowrap">Get Started</Link>
               </div>
             )}
           </div>

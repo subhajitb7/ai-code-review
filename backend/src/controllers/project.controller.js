@@ -145,6 +145,21 @@ export const uploadFile = async (req, res) => {
     });
 
     res.status(201).json(codeFile);
+
+    // System Message for Discussion
+    try {
+      const io = req.app.get('io');
+      const systemMessage = await Comment.create({
+        project: project._id,
+        user: req.user._id,
+        text: `🚀 uploaded new file: ${filename}`,
+        isTodo: false
+      });
+      const populated = await Comment.findById(systemMessage._id).populate('user', 'name');
+      if (io) io.to(`project:${project._id}`).emit('newComment', populated);
+    } catch (e) {
+      console.error('Failed to post system message:', e);
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -296,6 +311,21 @@ export const syncProjectFromRepo = async (req, res) => {
       project.repoUrl = repoUrl;
       project.repoProvider = provider;
       await project.save();
+
+      // System Message for Discussion
+      try {
+        const io = req.app.get('io');
+        const systemMessage = await Comment.create({
+          project: project._id,
+          user: req.user._id,
+          text: `🔄 synchronized project with ${provider} repository`,
+          isTodo: false
+        });
+        const populated = await Comment.findById(systemMessage._id).populate('user', 'name');
+        if (io) io.to(`project:${project._id}`).emit('newComment', populated);
+      } catch (e) {
+        console.error('Failed to post system message:', e);
+      }
     } else if (repoUrl.includes('gitlab.com')) {
       provider = 'gitlab';
       const path = repoUrl.split('gitlab.com/')[1].replace(/\//g, '%2F');
@@ -343,6 +373,21 @@ export const deleteFile = async (req, res) => {
 
     await CodeFile.findByIdAndDelete(fileId);
     res.json({ message: 'File deleted successfully' });
+
+    // System Message for Discussion
+    try {
+      const io = req.app.get('io');
+      const systemMessage = await Comment.create({
+        project: id,
+        user: req.user._id,
+        text: `🗑️ deleted file: ${file.filename}`,
+        isTodo: false
+      });
+      const populated = await Comment.findById(systemMessage._id).populate('user', 'name');
+      if (io) io.to(`project:${id}`).emit('newComment', populated);
+    } catch (e) {
+      console.error('Failed to post system message:', e);
+    }
   } catch (error) {
     console.error(error);
   }

@@ -52,7 +52,7 @@ const ResetPassword = () => {
       setError('Please enter the full 6-digit code');
       return;
     }
-    
+
     // Strict password validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/;
     if (!passwordRegex.test(newPassword)) {
@@ -154,13 +154,12 @@ const ResetPassword = () => {
                   { label: 'Number', met: /\d/.test(newPassword) },
                   { label: 'Symbol (@$!%*?&)', met: /[@$!%*?&]/.test(newPassword) },
                 ].map((req) => (
-                  <span 
-                    key={req.label} 
-                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${
-                      req.met 
-                        ? 'bg-green-500/10 text-green-400 border-green-500/30' 
+                  <span
+                    key={req.label}
+                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${req.met
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
                         : 'bg-red-500/5 text-red-500/40 border-red-500/10'
-                    }`}
+                      }`}
                   >
                     {req.label}
                   </span>

@@ -38,7 +38,7 @@ export const authUser = async (req, res) => {
 
     // Check if legacy password meets new rules
     user.mustUpdatePassword = !validatePassword(password);
-    
+
     // Always require 2FA after password check
     const otp = generateOtp();
     user.otp = otp;
@@ -72,8 +72,8 @@ export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!validatePassword(password)) {
-      return res.status(400).json({ 
-        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      return res.status(400).json({
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)'
       });
     }
 
@@ -204,7 +204,7 @@ export const updateUserProfile = async (req, res) => {
 
     user.name = req.body.name || user.name;
     // We can also allow email updates here later if needed
-    
+
     const updatedUser = await user.save();
     res.json({
       _id: updatedUser._id,
@@ -224,10 +224,10 @@ export const updateUserProfile = async (req, res) => {
 export const upgradePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
-    
+
     if (!validatePassword(newPassword)) {
-      return res.status(400).json({ 
-        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      return res.status(400).json({
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)'
       });
     }
 
@@ -283,8 +283,8 @@ export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (!validatePassword(newPassword)) {
-      return res.status(400).json({ 
-        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)' 
+      return res.status(400).json({
+        message: 'Password must be 6-8 characters and contain Uppercase, Lowercase, Number and Special Character (@$!%*?&)'
       });
     }
 

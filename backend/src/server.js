@@ -62,6 +62,14 @@ io.on('connection', (socket) => {
     socket.leave(roomId);
   });
 
+  socket.on('typing', ({ roomId, userName }) => {
+    socket.to(roomId).emit('userTyping', { userName, roomId });
+  });
+
+  socket.on('stopTyping', ({ roomId, userName }) => {
+    socket.to(roomId).emit('userStopTyping', { userName, roomId });
+  });
+
   socket.on('disconnect', () => {
     for (const [userId, socketId] of onlineUsers.entries()) {
       if (socketId === socket.id) {

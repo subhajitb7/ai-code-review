@@ -2,11 +2,14 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import hljs from 'highlight.js';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FileCode, Plus, FolderOpen, ArrowLeft, X, Upload, Trash2, RefreshCw, Settings, ChevronDown, CheckCircle, Sparkles } from 'lucide-react';
+import { 
+  FileCode, Plus, FolderOpen, ArrowLeft, X, Upload, Trash2, 
+  RefreshCw, Settings, ChevronDown, CheckCircle, Sparkles,
+  MessageSquare, StickyNote 
+} from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { ThemeContext } from '../context/ThemeContext';
-import CommentSection from '../components/CommentSection';
-import { MessageSquare, StickyNote } from 'lucide-react';
+import ProjectChatDrawer from '../components/ProjectChatDrawer';
 
 const ProjectDetail = () => {
   const { theme } = useContext(ThemeContext);
@@ -16,6 +19,7 @@ const ProjectDetail = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [fileForm, setFileForm] = useState({ filename: '', content: '', language: 'javascript' });
   const [isManualOverride, setIsManualOverride] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
@@ -143,10 +147,8 @@ const ProjectDetail = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Reset manual override on fresh file browse
     setIsManualOverride(false);
 
-    // Auto-detect language from file extension
     const ext = file.name.split('.').pop().toLowerCase();
     const langMap = {
       js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
@@ -185,34 +187,45 @@ const ProjectDetail = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative">
       <Link to="/projects" className="flex items-center gap-2 text-sec hover:text-main font-medium transition-colors mb-6 text-sm">
         <ArrowLeft className="h-4 w-4" /> Back to Projects
       </Link>
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 bg-sec/20 p-6 rounded-3xl border border-col">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-            <FolderOpen className="h-6 w-6 text-primary-500" />
+          <div className="h-16 w-16 bg-primary-500/10 rounded-2xl flex items-center justify-center border border-primary-500/20 shadow-xl shadow-primary-500/5">
+            <FolderOpen className="h-8 w-8 text-primary-500" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-main">{project.name}</h1>
-            <p className="text-sec text-sm mt-1 font-medium">
-              {project.description || 'No description'} · <span className="uppercase text-primary-600 font-bold">{project.language}</span>
+            <h1 className="text-3xl font-bold text-main tracking-tight">{project.name}</h1>
+            <p className="text-sec text-sm mt-1 font-bold flex items-center gap-2">
+              {project.description || 'No description'} · <span className="uppercase text-primary-500">{project.language}</span>
               {project.owner && (
-                <span className="ml-3 px-2 py-0.5 bg-primary-500/10 text-primary-600 rounded-full text-[10px] uppercase font-black tracking-widest border border-primary-500/20 shadow-sm">
-                  Owner: {project.owner.name}
+                <span className="ml-2 px-3 py-1 bg-primary-500/10 text-primary-600 rounded-full text-[9px] uppercase font-black tracking-widest border border-primary-500/10">
+                  {project.owner.name}
                 </span>
               )}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setChatOpen(true)}
+            className="h-12 w-12 bg-sec hover:bg-sec/80 border border-col rounded-xl flex items-center justify-center text-sec hover:text-primary-500 transition-all shadow-sm group relative"
+            title="Team Discussion"
+          >
+            <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <span className="absolute top-0 right-0 h-3 w-3 bg-primary-500 border-2 border-main rounded-full"></span>
+          </button>
+          
+          <div className="h-10 w-[1px] bg-col mx-2 hidden sm:block"></div>
+
           {project.repoUrl && (
             <button 
               onClick={handleSync} 
               disabled={syncing}
-              className={`btn-secondary flex items-center gap-2 font-bold ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`btn-secondary h-12 px-6 flex items-center gap-2 font-bold ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
               title="Pull latest files from repository"
             >
               <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
@@ -220,52 +233,66 @@ const ProjectDetail = () => {
             </button>
           )}
           {project.canDelete && (
-            <button onClick={handleDeleteProject} className="btn-secondary border-red-500/30 text-red-600 hover:bg-red-500/10 flex items-center gap-2 font-bold">
-              <Trash2 className="h-4 w-4" /> Delete Project
+            <button onClick={handleDeleteProject} className="btn-secondary h-12 px-6 border-red-500/30 text-red-600 hover:bg-red-500/10 flex items-center gap-2 font-bold">
+              <Trash2 className="h-4 w-4" />
             </button>
           )}
-          <button onClick={() => setShowUpload(true)} className="btn-primary flex items-center gap-2 font-bold ring-1 ring-primary-500/50">
+          <button onClick={() => setShowUpload(true)} className="btn-primary h-12 px-8 flex items-center gap-2 font-bold ring-1 ring-primary-500/50 shadow-lg shadow-primary-500/20">
             <Plus className="h-5 w-5" /> Add File
           </button>
         </div>
       </div>
 
-      <div className="glass-panel p-6">
-        <h2 className="text-xl font-bold text-main mb-6 flex items-center gap-2">
-          <FileCode className="h-5 w-5 text-primary-500" /> Files
+      <div className="glass-panel p-8 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] pointer-events-none group-hover:bg-primary-500/10 transition-all"></div>
+        <h2 className="text-xl font-bold text-main mb-8 flex items-center gap-3">
+          <FileCode className="h-5 w-5 text-primary-500" /> 
+          Project Files
+          <span className="px-2 py-0.5 bg-sec text-sec text-[10px] rounded-md border border-col font-black">{project.files?.length || 0} items</span>
         </h2>
         {!project.files || project.files.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sec font-medium mb-4">No files uploaded yet.</p>
-            <button onClick={() => setShowUpload(true)} className="btn-secondary">Upload First File</button>
+          <div className="text-center py-20 flex flex-col items-center gap-6">
+            <div className="h-20 w-20 bg-sec rounded-3xl border border-col flex items-center justify-center opacity-40">
+                <FolderOpen className="h-10 w-10 text-sec" />
+            </div>
+            <div>
+                 <p className="text-lg font-bold text-main mb-2">Empty Universe</p>
+                 <p className="text-sm text-sec font-medium max-w-xs mx-auto">This project hasn't been populated with any source code yet.</p>
+            </div>
+            <button onClick={() => setShowUpload(true)} className="btn-primary px-8">Upload First File</button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {project.files.map((file) => (
               <Link
                 key={file._id}
                 to={`/projects/${id}/files/${file._id}`}
-                className="flex items-center justify-between p-4 bg-sec border border-col rounded-lg hover:border-primary-500/50 hover:shadow-lg transition-all"
+                className="group/file flex flex-col p-5 bg-sec/40 border border-col rounded-2xl hover:border-primary-500/50 hover:bg-sec/80 transition-all duration-300 relative overflow-hidden"
               >
-                <div className="flex items-center gap-3">
-                  <FileCode className="h-5 w-5 text-sec" />
-                  <div>
-                    <p className="font-bold text-main">{file.filename}</p>
-                    <p className="text-xs text-sec font-medium">v{file.currentVersion} · <span className="uppercase">{file.language}</span></p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 bg-primary-500/10 rounded-xl flex items-center justify-center group-hover/file:bg-primary-500 group-hover/file:text-white transition-all">
+                    <FileCode className="h-5 w-5 text-primary-500 group-hover/file:text-white" />
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-sec font-medium">{new Date(file.createdAt).toLocaleDateString()}</span>
-                  
                   {project.canDelete && (
                     <button 
                       onClick={(e) => handleDeleteFile(e, file._id)}
-                      className="p-2 text-sec hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                      title="Delete file"
+                      className="p-2 text-sec hover:text-red-500 opacity-0 group-hover/file:opacity-100 transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
+                </div>
+                
+                <h4 className="font-bold text-main truncate mb-1">{file.filename}</h4>
+                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-sec">
+                  <span className="text-primary-500">v{file.currentVersion}</span>
+                  <span className="h-1 w-1 bg-current rounded-full opacity-20"></span>
+                  <span>{file.language}</span>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-col flex items-center justify-between opacity-40 group-hover/file:opacity-100 transition-all">
+                   <span className="text-[9px] font-bold text-sec">{new Date(file.createdAt).toLocaleDateString()}</span>
+                   <Settings className="h-3 w-3 text-sec group-hover/file:text-primary-500" />
                 </div>
               </Link>
             ))}
@@ -273,11 +300,16 @@ const ProjectDetail = () => {
         )}
       </div>
 
-      {/* Upload File Modal */}
+      <ProjectChatDrawer 
+        projectId={id}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
+
       {showUpload && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-panel w-full max-w-4xl p-8 relative max-h-[90vh] overflow-y-auto shadow-2xl">
-            <button onClick={() => setShowUpload(false)} className="absolute top-4 right-4 text-sec hover:text-main">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+          <div className="glass-panel w-full max-w-4xl p-8 relative max-h-[90vh] overflow-y-auto shadow-[0_30px_100px_rgba(0,0,0,0.5)] border-white/5">
+            <button onClick={() => setShowUpload(false)} className="absolute top-6 right-6 p-2 bg-sec rounded-xl text-sec hover:text-rose-500 transition-all">
               <X className="h-5 w-5" />
             </button>
             <h2 className="text-2xl font-bold text-main mb-6">Upload File</h2>
@@ -383,21 +415,12 @@ const ProjectDetail = () => {
         </div>
       )}
 
-      {/* Project Notes / Discussion */}
-      <div className="glass-panel p-6 mt-8 shadow-xl">
-        <h2 className="text-xl font-bold text-main mb-6 flex items-center gap-2">
-          {project.team ? (
-            <MessageSquare className="h-5 w-5 text-primary-600" />
-          ) : (
-            <StickyNote className="h-5 w-5 text-primary-600" />
-          )}
-          {project.team ? 'Team Discussion' : 'My Project Notes'}
-        </h2>
-        <CommentSection 
-          projectId={id} 
-          title={project.team ? 'Discussion' : 'Notes'} 
-        />
-      </div>
+      {/* Project Discussion Side Drawer */}
+      <ProjectChatDrawer 
+        projectId={id}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </div>
   );
 };
