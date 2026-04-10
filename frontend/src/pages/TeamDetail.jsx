@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArrowLeft, Users, Plus, Trash2, Crown, ShieldCheck, User as UserIcon, FolderOpen, X, UserPlus, MessageSquare } from 'lucide-react';
-import TeamChat from '../components/TeamChat';
+import TeamChatDrawer from '../components/TeamChatDrawer';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
 
 const TeamDetail = () => {
@@ -16,6 +16,7 @@ const TeamDetail = () => {
   const [showLinkProject, setShowLinkProject] = useState(false);
   const [myProjects, setMyProjects] = useState([]);
   const [error, setError] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const fetchTeam = async () => {
     try {
@@ -75,6 +76,16 @@ const TeamDetail = () => {
     }
   };
 
+  const handleRemoveProject = async (projectId) => {
+    if (!confirm('Un-link this project from the team?')) return;
+    try {
+      const { data } = await axios.delete(`/api/teams/${id}/projects/${projectId}`);
+      setTeam(data);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error');
+    }
+  };
+
   const openLinkProject = async () => {
     try {
       const { data } = await axios.get('/api/projects');
@@ -102,7 +113,7 @@ const TeamDetail = () => {
   if (!team) return <div className="text-center py-20 text-sec font-medium">Team not found.</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div className="max-w-[80vw] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <Link to="/teams" className="flex items-center gap-2 text-sec hover:text-main font-medium transition-colors mb-6 text-sm">
         <ArrowLeft className="h-4 w-4" /> Back to Teams
       </Link>
@@ -113,57 +124,66 @@ const TeamDetail = () => {
             <Users className="h-6 w-6 text-purple-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-main">{team.name}</h1>
+            <h1 className="text-2xl font-bold text-main leading-none">{team.name}</h1>
             <p className="text-sec text-sm mt-1 font-medium">{team.description || 'No description'}</p>
           </div>
         </div>
         {canManage && (
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowInvite(true)} className="btn-primary flex items-center gap-2 text-sm">
+            <button 
+              onClick={() => setIsChatOpen(true)} 
+              className="h-10 w-10 flex items-center justify-center bg-ter border border-col rounded-xl text-sec hover:text-primary-500 hover:border-primary-500/50 transition-all group"
+              title="Team Chat"
+            >
+              <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-all" />
+            </button>
+            <button onClick={() => setShowInvite(true)} className="btn-primary flex items-center gap-2 text-sm px-6">
               <UserPlus className="h-4 w-4" /> Invite
             </button>
-            <button onClick={openLinkProject} className="btn-secondary flex items-center gap-2 text-sm">
+            <button onClick={openLinkProject} className="btn-secondary flex items-center gap-2 text-sm px-6">
               <FolderOpen className="h-4 w-4" /> Link Project
             </button>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Members (Moved here as 2/3) */}
-          <div className="glass-panel p-6">
-            <h2 className="text-lg font-bold text-main mb-4 flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary-600" /> Members ({team.members?.length || 0})
+      {/* Grid Wrapper: Centered 80% width of container */}
+      <div className="max-w-[80%] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Left Col: Members (Compact) */}
+          <div className="glass-panel p-4 shadow-xl border-primary-500/10 transition-all duration-500 ease-in-out">
+            <h2 className="text-[10px] font-black text-sec uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+              <Users className="h-4 w-4 text-primary-500" /> Members ({team.members?.length || 0})
             </h2>
             <div className="space-y-2">
               {team.members?.map((m) => (
-                <div key={m.user?._id || m.user || Math.random()} className="flex items-center justify-between p-3 bg-sec border border-col rounded-lg">
+                <div key={m.user?._id || m.user || Math.random()} className="flex items-center justify-between p-2.5 bg-sec/50 border border-col rounded-lg hover:bg-sec transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-primary-500/10 flex items-center justify-center text-sm font-bold text-primary-600">
-                      {m.user?.name?.charAt(0).toUpperCase()}
+                    <div className="h-8 w-8 rounded-full bg-primary-500/10 flex items-center justify-center text-[10px] font-bold text-primary-600 border border-col">
+                      {m.user?.name?.charAt(0).toUpperCase() || '?'}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-main">{m.user?.name}</span>
-                        {roleIcon(m.role)}
-                        <span className="text-[10px] text-sec font-bold uppercase tracking-wider">{m.role}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-xs text-main">{m.user?.name || 'Unknown Member'}</span>
+                        {m.role && roleIcon(m.role)}
+                        <span className="text-[8px] text-sec font-black uppercase tracking-wider opacity-40">{m.role || 'Ghost'}</span>
                       </div>
-                      <p className="text-xs text-sec font-medium">{m.user?.email}</p>
+                      <p className="text-[10px] text-sec font-medium opacity-40">{m.user?.email || 'Missing data'}</p>
                     </div>
                   </div>
                   {canManage && m.role !== 'owner' && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <select
                         value={m.role}
-                        onChange={(e) => handleRoleChange(m.user?._id, e.target.value)}
-                        className="text-xs bg-ter border border-col rounded px-2 py-1 text-main font-medium cursor-pointer"
+                        onChange={(e) => handleRoleChange(m.user?._id || m.user || m._id, e.target.value)}
+                        className="text-[8px] uppercase tracking-widest bg-ter border border-col rounded px-1.5 py-1 text-main font-black cursor-pointer hover:border-primary-500/50 transition-all outline-none"
                       >
                         <option value="member">Member</option>
                         <option value="admin">Admin</option>
                       </select>
-                      <button onClick={() => handleRemove(m.user?._id)}
-                        className="p-1.5 text-sec hover:text-red-500 hover:bg-red-500/10 rounded transition-colors">
+                      <button onClick={() => handleRemove(m.user?._id || m.user || m._id)}
+                        className="p-1.5 text-sec hover:text-red-500 hover:bg-red-500/10 rounded transition-all"
+                        title="Remove Member">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -173,25 +193,47 @@ const TeamDetail = () => {
             </div>
           </div>
 
-          {/* Projects (Moved here as 2/3) */}
-          <div className="glass-panel p-6">
-            <h2 className="text-lg font-bold text-main mb-4 flex items-center gap-2">
-              <FolderOpen className="h-5 w-5 text-primary-600" /> Projects ({team.projects?.length || 0})
+          {/* Right Col: Projects (Compact) */}
+          <div className="glass-panel p-4 shadow-xl border-purple-500/10 transition-all duration-500 ease-in-out">
+            <h2 className="text-[10px] font-black text-sec uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+              <FolderOpen className="h-4 w-4 text-purple-500" /> Linked Projects ({team.projects?.length || 0})
             </h2>
             {!team.projects || team.projects.length === 0 ? (
-              <p className="text-sec font-medium text-sm text-center py-8">No projects linked yet.</p>
+              <div className="flex flex-col items-center justify-center py-12 opacity-30">
+                <FolderOpen className="h-8 w-8 mb-2" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-main">No projects linked</p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {team.projects.map((p) => (
                   <Link key={p._id} to={`/projects/${p._id}`}
-                    className="flex items-center justify-between p-4 bg-sec border border-col rounded-xl hover:border-primary-500/50 hover:shadow-lg transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 bg-primary-500/10 rounded-xl flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white transition-all">
-                        <FolderOpen className="h-5 w-5 text-sec group-hover:text-white" />
+                    className="flex items-center justify-between p-2.5 bg-sec/50 border border-col rounded-lg hover:border-primary-500/50 hover:shadow-xl hover:bg-sec transition-all group">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 bg-primary-500/10 rounded-xl flex items-center justify-center group-hover:bg-primary-500 group-hover:text-white transition-all border border-transparent group-hover:border-primary-400">
+                        <FolderOpen className="h-4 w-4 text-sec group-hover:text-white" />
                       </div>
                       <div>
-                        <p className="font-bold text-sm text-main">{p.name}</p>
-                        <p className="text-[10px] text-sec font-black uppercase tracking-widest opacity-60 mt-0.5">{p.language}</p>
+                        <p className="font-bold text-xs text-main group-hover:text-primary-500 transition-colors">{p.name}</p>
+                        <p className="text-[8px] text-sec font-black uppercase tracking-widest opacity-60 mt-0.5">
+                          {p.language} • <span className="text-primary-500 font-bold tracking-normal italic">{p.owner?.name || 'Unknown'}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {myRole === 'owner' && (
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRemoveProject(p._id);
+                          }}
+                          className="h-8 w-8 flex items-center justify-center text-sec hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          title="Un-link Project"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                      <div className="h-6 w-6 rounded-full border border-col flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                        <ArrowLeft className="h-3 w-3 rotate-180 text-sec" />
                       </div>
                     </div>
                   </Link>
@@ -200,22 +242,13 @@ const TeamDetail = () => {
             )}
           </div>
         </div>
-
-        <div className="lg:col-span-1">
-          <div className="glass-panel p-6 h-full border-col/50">
-            <h3 className="text-xl font-bold text-main mb-6 flex items-center gap-3">
-              <MessageSquare className="h-5 w-5 text-primary-500" />
-              Discussion
-            </h3>
-            <TeamChat 
-               teamId={id} 
-               placeholder="Share ideas with the team..."
-               emptyMessage="The team hub is empty. Send the first message!"
-               userRole={myRole}
-            />
-          </div>
-        </div>
       </div>
+
+      <TeamChatDrawer 
+        teamId={id}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
 
 
       {/* Invite Modal */}

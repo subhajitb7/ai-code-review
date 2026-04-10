@@ -42,7 +42,7 @@ export const getTeamById = async (req, res) => {
     const team = await Team.findById(req.params.id)
       .populate('owner', 'name email')
       .populate('members.user', 'name email')
-      .populate('projects');
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     if (!team) return res.status(404).json({ message: 'Team not found' });
 
@@ -90,7 +90,7 @@ export const inviteMember = async (req, res) => {
     const populated = await Team.findById(team._id)
       .populate('owner', 'name email')
       .populate('members.user', 'name email')
-      .populate('projects');
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     res.json(populated);
   } catch (error) {
@@ -115,13 +115,21 @@ export const removeMember = async (req, res) => {
       return res.status(400).json({ message: 'Cannot remove the team owner' });
     }
 
-    team.members = team.members.filter((m) => m.user.toString() !== req.params.userId);
+    // Defensive filter: targeting either the userId or the member entry _id
+    team.members = team.members.filter((m) => {
+      const entryId = m._id ? m._id.toString() : null;
+      const mUserId = m.user ? m.user.toString() : null;
+      
+      // Keep if neither ID matches the target
+      return entryId !== req.params.userId && mUserId !== req.params.userId;
+    });
+
     await team.save();
 
     const populated = await Team.findById(team._id)
       .populate('owner', 'name email')
       .populate('members.user', 'name email')
-      .populate('projects');
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     res.json(populated);
   } catch (error) {
@@ -155,7 +163,7 @@ export const updateMemberRole = async (req, res) => {
     const populated = await Team.findById(team._id)
       .populate('owner', 'name email')
       .populate('members.user', 'name email')
-      .populate('projects');
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     res.json(populated);
   } catch (error) {
@@ -182,7 +190,35 @@ export const addProjectToTeam = async (req, res) => {
     const populated = await Team.findById(team._id)
       .populate('owner', 'name email')
       .populate('members.user', 'name email')
-      .populate('projects');
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
+
+    res.json(populated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Remove a project from team
+// @route   DELETE /api/teams/:id/projects/:projectId
+export const removeProjectFromTeam = async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id);
+    if (!team) return res.status(404).json({ message: 'Team not found' });
+
+    // Check permission - Only Owner can remove projects
+    const requester = team.members.find((m) => m.user.toString() === req.user._id.toString());
+    if (!requester || requester.role !== 'owner') {
+      return res.status(403).json({ message: 'Only the team owner can remove projects' });
+    }
+
+    team.projects = team.projects.filter((p) => p.toString() !== req.params.projectId);
+    await team.save();
+
+    const populated = await Team.findById(team._id)
+      .populate('owner', 'name email')
+      .populate('members.user', 'name email')
+      .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     res.json(populated);
   } catch (error) {

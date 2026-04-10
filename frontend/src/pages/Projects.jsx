@@ -112,7 +112,7 @@ const Projects = () => {
                       <div className="h-4 w-4 rounded-full bg-primary-500/10 flex items-center justify-center text-[8px] font-black text-primary-600 border border-primary-500/20">
                         {proj.owner?.name?.charAt(0).toUpperCase() || '?'}
                       </div>
-                      <span className="truncate max-w-[100px]">Owner: <span className="text-main font-bold">{proj.owner?.name || 'Unknown'}</span></span>
+                      <span className="truncate max-w-[150px]">Owner: <span className="text-main font-bold">{proj.owner?.name || 'Unknown'}</span></span>
                    </div>
                    <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
                 </div>

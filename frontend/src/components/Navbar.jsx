@@ -71,13 +71,12 @@ const Navbar = () => {
           {/* Left: Logo + Nav */}
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2 group shrink-0">
-              <div className={`p-2 rounded-lg transition-all ${isAdmin
-                ? 'bg-gradient-to-br from-yellow-500 to-amber-600 group-hover:shadow-[0_0_15px_rgba(234,179,8,0.4)]'
-                : 'bg-gradient-to-br from-primary-500 to-primary-600 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]'}`}>
-                <Code2 className="h-5 w-5 text-white" />
+              <div className="rounded-xl transition-all group-hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                <img src="/logo.png" alt="Syncodalyze Logo" className="h-8 w-8 object-contain" />
               </div>
-              <span className='text-2xl font-bold'>
-                Syncodalyze AI
+              <span className='text-2xl font-black tracking-tighter flex items-center gap-0.5 group-hover:scale-[1.02] transition-transform'>
+                <span className="bg-gradient-to-r from-[var(--text-main)] to-primary-400 bg-clip-text text-transparent">Syncodalyze</span>
+                <span className="text-primary-500">AI</span>
               </span>
             </Link>
 

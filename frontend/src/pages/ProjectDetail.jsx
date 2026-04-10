@@ -297,13 +297,13 @@ const ProjectDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Back to Projects
       </Link>
 
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 bg-sec/20 p-6 rounded-3xl border border-col">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 bg-sec/20 p-4 rounded-3xl">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 bg-primary-500/10 rounded-2xl flex items-center justify-center border border-primary-500/20 shadow-xl shadow-primary-500/5">
-            <FolderOpen className="h-8 w-8 text-primary-500" />
+          <div className="h-12 w-12 bg-primary-500/10 rounded-2xl flex items-center justify-center border border-primary-500/20 shadow-xl shadow-primary-500/5">
+            <FolderOpen className="h-6 w-6 text-primary-500" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-main tracking-tight">{project.name}</h1>
+            <h1 className="text-xl font-bold text-main tracking-tight leading-none">{project.name}</h1>
             <p className="text-sec text-sm mt-1 font-bold flex items-center gap-2">
               {project.description || 'No description'} · <span className="uppercase text-primary-500">{project.language}</span>
               {project.owner && (
@@ -348,9 +348,9 @@ const ProjectDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className={project.team ? "lg:col-span-2" : "lg:col-span-3"}>
-          <div className="glass-panel p-8 shadow-2xl relative overflow-hidden group h-full">
+          <div className="glass-panel p-8 shadow-2xl relative overflow-hidden group transition-all duration-500 ease-in-out">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[100px] pointer-events-none group-hover:bg-primary-500/10 transition-all"></div>
             <h2 className="text-xl font-bold text-main mb-8 flex items-center gap-3">
               <FileCode className="h-5 w-5 text-primary-500" />
@@ -407,7 +407,7 @@ const ProjectDetail = () => {
 
         {project.team && (
           <div className="lg:col-span-1">
-            <div className="glass-panel p-6 h-full border-col/50">
+            <div className="glass-panel p-6 border-col/50">
               <h3 className="text-xl font-bold text-main mb-6 flex items-center gap-3">
                 <ListTodo className="h-5 w-5 text-emerald-500" />
                 Development Insights
@@ -462,7 +462,7 @@ const ProjectDetail = () => {
                   <h3 className="text-sm font-black uppercase tracking-widest text-primary-500">Upload Queue ({uploadQueue.length} files)</h3>
                   <button onClick={() => setUploadQueue([])} className="text-[10px] font-black uppercase text-red-500 hover:underline">Clear All</button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto p-1 transition-all duration-500 ease-in-out">
                   {uploadQueue.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-sec/30 border border-col rounded-xl group/q">
                       <div className="flex items-center gap-3 min-w-0">

@@ -1,7 +1,7 @@
 import express from 'express';
 import {
   createTeam, getMyTeams, getTeamById, inviteMember,
-  removeMember, updateMemberRole, addProjectToTeam, deleteTeam,
+  removeMember, updateMemberRole, addProjectToTeam, removeProjectFromTeam, deleteTeam,
 } from '../controllers/team.controller.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -14,6 +14,7 @@ router.post('/:id/invite', protect, inviteMember);
 router.delete('/:id/members/:userId', protect, removeMember);
 router.put('/:id/members/:userId/role', protect, updateMemberRole);
 router.post('/:id/projects', protect, addProjectToTeam);
+router.delete('/:id/projects/:projectId', protect, removeProjectFromTeam);
 router.delete('/:id', protect, deleteTeam);
 
 export default router;

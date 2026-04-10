@@ -5,15 +5,16 @@ import { SocketPubSubContext } from '../context/SocketPubSubContext';
 import useSpeechToText from '../hooks/useSpeechToText';
 import { 
   X, Send, User, Sparkles, MessageSquare, 
-  Trash2, ListTodo, Plus, Info, Clock, CheckCircle2,
-  Mic, MicOff
+  Trash2, Mic, MicOff 
 } from 'lucide-react';
 
-const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [], setInitialMessages: setMessages, typingUser }) => {
+const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
   const { user } = useContext(AuthContext);
-  const { emitEvent: emit } = useContext(SocketPubSubContext);
+  const { socket } = useContext(SocketPubSubContext);
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [typingUser, setTypingUser] = useState(null);
   const scrollRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
@@ -24,6 +25,53 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
 
   const socketRoom = `team:${teamId}`;
 
+  const fetchMessages = async () => {
+    try {
+      const { data } = await axios.get(`/api/messages/${teamId}`);
+      setMessages(data);
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen || !teamId) return;
+    
+    fetchMessages();
+
+    if (socket) {
+      socket.emit('joinRoom', socketRoom);
+
+      const handleNewMessage = (newMessage) => {
+        setMessages((prev) => {
+          if (prev.find(m => m._id === newMessage._id)) return prev;
+          return [...prev, newMessage];
+        });
+      };
+
+      const handleTyping = ({ userName }) => {
+        if (userName !== user?.name) setTypingUser(userName);
+      };
+
+      const handleStopTyping = () => {
+        setTypingUser(null);
+      };
+
+      socket.on('newTeamMessage', handleNewMessage);
+      socket.on('typing', handleTyping);
+      socket.on('stopTyping', handleStopTyping);
+
+      return () => {
+        socket.emit('leaveRoom', socketRoom);
+        socket.off('newTeamMessage', handleNewMessage);
+        socket.off('typing', handleTyping);
+        socket.off('stopTyping', handleStopTyping);
+      };
+    }
+  }, [teamId, socket, socketRoom, isOpen]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
@@ -31,13 +79,13 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
     }
   }, [messages, typingUser, isOpen]);
 
-  const handleTyping = () => {
-    if (!user) return;
-    emit('typing', { roomId: socketRoom, userName: user.name });
+  const handleTypingEvent = () => {
+    if (!user || !socket) return;
+    socket.emit('typing', { roomId: socketRoom, userName: user.name });
     
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      emit('stopTyping', { roomId: socketRoom, userName: user.name });
+      socket.emit('stopTyping', { roomId: socketRoom, userName: user.name });
     }, 2000);
   };
 
@@ -46,9 +94,9 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
     if (!text.trim()) return;
 
     try {
-      await axios.post(`/api/teams/${teamId}/comments`, { text: text.trim() });
+      await axios.post(`/api/messages/${teamId}`, { text: text.trim() });
       setText('');
-      emit('stopTyping', { roomId: socketRoom, userName: user.name });
+      if (socket) socket.emit('stopTyping', { roomId: socketRoom, userName: user.name });
     } catch (err) {
       console.error('Failed to send message:', err);
     }
@@ -57,7 +105,7 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-main border-l border-col shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-main border-l border-col shadow-2xl z-[70] flex flex-col animate-in slide-in-from-right duration-300">
       {/* Header */}
       <div className="p-6 border-b border-col flex items-center justify-between bg-sec/30 backdrop-blur-md">
         <div className="flex items-center gap-3">
@@ -65,8 +113,8 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
             <MessageSquare className="h-5 w-5 text-primary-500" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-main leading-tight">Team Hub</h3>
-            <p className="text-[10px] text-sec font-black uppercase tracking-widest mt-1">Live Synchronization</p>
+            <h3 className="text-lg font-bold text-main leading-tight">Team Chat</h3>
+            <p className="text-[10px] text-sec font-black uppercase tracking-widest mt-1">Real-Time Discussion</p>
           </div>
         </div>
         <button onClick={onClose} className="p-2 text-sec hover:text-main hover:bg-sec rounded-xl transition-all">
@@ -77,9 +125,9 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
       {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"
+        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth custom-scrollbar"
       >
-        {messages.length === 0 ? (
+        {messages.length === 0 && !loading ? (
           <div className="flex flex-col items-center justify-center h-full text-center gap-4 opacity-40">
             <Sparkles className="h-12 w-12 text-primary-500" />
             <div>
@@ -93,14 +141,16 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
             
             return (
               <div key={msg._id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                <div className={`flex items-end gap-2 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center border shadow-sm ${
+                <div className={`flex items-end gap-3 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                  {/* Avatar */}
+                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center border shadow-sm text-xs font-bold ${
                     isMe ? 'bg-primary-500 border-primary-600 text-white' : 'bg-sec border-col text-sec'
                   }`}>
                     {msg.user?.name?.charAt(0).toUpperCase() || <User className="h-4 w-4" />}
                   </div>
                   
-                  <div className={`p-3 rounded-2xl text-sm font-medium shadow-sm break-words ${
+                  {/* Bubble */}
+                  <div className={`px-4 py-2.5 rounded-2xl text-sm font-medium shadow-sm break-words leading-relaxed ${
                     isMe 
                       ? 'bg-primary-500 text-white rounded-br-none' 
                       : 'bg-sec text-main border border-col rounded-bl-none'
@@ -108,8 +158,10 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
                     {msg.text}
                   </div>
                 </div>
-                <div className={`flex items-center gap-2 mt-1.5 px-10 text-[9px] font-black uppercase tracking-tighter opacity-40 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                   <span>{msg.user?.name}</span>
+                
+                {/* Meta */}
+                <div className={`flex items-center gap-2 mt-1.5 px-11 text-[9px] font-black uppercase tracking-tighter opacity-40 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                   <span>{isMe ? 'You' : msg.user?.name}</span>
                    <span className="h-1 w-1 bg-current rounded-full"></span>
                    <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
@@ -117,12 +169,9 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
             );
           })
         )}
-      </div>
-
-      {/* Footer Area */}
-      <div className="p-6 border-t border-col bg-sec/30 backdrop-blur-md">
+        
         {typingUser && (
-          <div className="mb-3 px-2 flex items-center gap-2 animate-pulse">
+          <div className="px-11 flex items-center gap-2 animate-pulse">
             <div className="flex gap-1">
               <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce"></span>
               <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
@@ -133,13 +182,16 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
             </p>
           </div>
         )}
-        
+      </div>
+
+      {/* Footer Area */}
+      <div className="p-6 border-t border-col bg-sec/30 backdrop-blur-md">
         <form onSubmit={handleSendMessage} className="relative group">
           <textarea
             value={text}
             onChange={(e) => {
               setText(e.target.value);
-              handleTyping();
+              handleTypingEvent();
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -148,17 +200,16 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
               }
             }}
             placeholder="Type a message..."
-            className="w-full bg-main border border-col rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-primary-500/50 transition-all resize-none shadow-inner"
+            className="w-full bg-main border border-col rounded-2xl px-5 py-4 text-sm font-medium outline-none focus:border-primary-500/50 transition-all resize-none shadow-inner"
             rows={2}
           />
-          <div className="absolute bottom-2 right-2 flex items-center gap-2">
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
             <button
                type="button"
                onClick={isListening ? stopListening : startListening}
                className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${
                  isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-sec text-sec hover:text-primary-500'
                }`}
-               title={isListening ? 'Stop Listening' : 'Voice Typing'}
             >
               {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </button>
@@ -171,8 +222,8 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose, initialMessages: messages = [
             </button>
           </div>
         </form>
-        <p className="text-[9px] text-center text-sec mt-4 font-black uppercase tracking-[0.2em] opacity-30">
-          Encrypted Team Stream
+        <p className="text-[9px] text-center text-sec mt-5 font-black uppercase tracking-[0.2em] opacity-30">
+          Encrypted Collaborative Stream
         </p>
       </div>
     </div>
