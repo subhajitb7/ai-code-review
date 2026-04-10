@@ -1,41 +1,58 @@
 import Review from '../models/Review.model.js';
 import CodeFile from '../models/CodeFile.model.js';
+import SystemSettings from '../models/SystemSettings.model.js';
 import { callGroq } from '../utils/aiHelper.js';
+
+// Helper to fetch settings with fallback
+const getSettings = async () => {
+  try {
+    let settings = await SystemSettings.findOne({});
+    if (!settings) {
+      settings = await SystemSettings.create({});
+    }
+    return settings;
+  } catch (err) {
+    console.error('Failed to fetch system settings:', err);
+    return { maintenanceMode: false, defaultAiModel: 'llama-3.1-8b-instant', maxTokensPerReview: 2000 };
+  }
+};
 
 // @desc    Summarize a source file
 // @route   POST /api/ai/summarize-file
 export const summarizeFile = async (req, res) => {
   const { fileId } = req.body;
   try {
+    const settings = await getSettings();
+    if (settings.maintenanceMode) {
+      return res.status(503).json({ message: 'Platform is currently in Maintenance Mode. AI features are temporarily disabled.' });
+    }
+
     const file = await CodeFile.findById(fileId);
     if (!file) return res.status(404).json({ message: 'File not found' });
 
-    // Caching check: If an AI summary already exists for the current version, return it instantly
+    // Caching check
     const currentV = file.versions.find(v => Number(v.versionNumber) === Number(file.currentVersion));
     if (currentV && currentV.aiSummary) {
-      console.log(`Serving cached summary for file ${fileId} v${file.currentVersion}`);
       return res.json({ summary: currentV.aiSummary });
     }
 
     const prompt = `Summarize the logic and purpose of the following code in exactly 3 concise bullet points. Be technical but understandable.\n\nFilename: ${file.filename}\nCode:\n\`\`\`${file.language}\n${file.content}\n\`\`\``;
     const systemPrompt = 'You are an elite Technical Architect. Summarize code logic with extreme precision and technical density. No conversational filler.';
     
-    const { content: summary } = await callGroq(systemPrompt, prompt, 0.3, 500);
+    const { content: summary } = await callGroq(
+      systemPrompt, 
+      prompt, 
+      0.3, 
+      settings.maxTokensPerReview, 
+      settings.defaultAiModel
+    );
 
     // Save summary to current version
-    console.log(`Persisting summary for file ${fileId}`);
-    try {
-      const currentV = file.versions.find(v => Number(v.versionNumber) === Number(file.currentVersion));
-      if (currentV) {
-        currentV.aiSummary = summary;
-        file.markModified('versions');
-        await file.save();
-        console.log(`Summary persisted for version ${file.currentVersion}`);
-      } else {
-        console.warn(`Version ${file.currentVersion} not found in file ${fileId} for summary`);
-      }
-    } catch (saveError) {
-      console.error('Failed to save AI summary to file:', saveError);
+    const currentV_upd = file.versions.find(v => Number(v.versionNumber) === Number(file.currentVersion));
+    if (currentV_upd) {
+      currentV_upd.aiSummary = summary;
+      file.markModified('versions');
+      await file.save();
     }
 
     res.json({ summary });
@@ -49,17 +66,24 @@ export const summarizeFile = async (req, res) => {
 // @route   POST /api/ai/summarize-snippet
 export const summarizeSnippet = async (req, res) => {
   const { codeSnippet, language, title } = req.body;
-  
-  if (!codeSnippet) {
-    return res.status(400).json({ message: 'Code snippet is required' });
-  }
+  if (!codeSnippet) return res.status(400).json({ message: 'Code snippet is required' });
 
   try {
+    const settings = await getSettings();
+    if (settings.maintenanceMode) {
+      return res.status(503).json({ message: 'Platform is currently in Maintenance Mode. AI features are temporarily disabled.' });
+    }
+
     const prompt = `Summarize the logic and purpose of the following code in exactly 3 concise bullet points. Be technical but understandable.\n\nTitle: ${title || 'Snippet'}\nCode:\n\`\`\`${language || ''}\n${codeSnippet}\n\`\`\``;
     const systemPrompt = 'You are an elite Technical Architect. Summarize code logic with extreme precision and technical density. No conversational filler.';
     
-    // We use the same Groq helper
-    const { content: summary } = await callGroq(systemPrompt, prompt, 0.3, 500);
+    const { content: summary } = await callGroq(
+      systemPrompt, 
+      prompt, 
+      0.3, 
+      settings.maxTokensPerReview, 
+      settings.defaultAiModel
+    );
 
     res.json({ summary });
   } catch (error) {
@@ -72,6 +96,11 @@ export const summarizeSnippet = async (req, res) => {
 // @route   GET /api/ai/insights
 export const getDeveloperInsights = async (req, res) => {
   try {
+    const settings = await getSettings();
+    if (settings.maintenanceMode) {
+      return res.status(503).json({ message: 'Platform is currently in Maintenance Mode. AI features are temporarily disabled.' });
+    }
+
     const userId = req.user._id;
     const reviews = await Review.find({ user: userId }).select('aiFeedback aiTags bugsFound createdAt').sort({ createdAt: -1 }).limit(10);
 
@@ -84,7 +113,13 @@ export const getDeveloperInsights = async (req, res) => {
     const prompt = `Based on the following history of code reviews, provide a personalized growth insight for this developer. What is their recurring weakness? What have they improved? Provide a 3-sentence summary.\n\nReview History:\n${reviewContext}`;
     const systemPrompt = 'You are an elite Engineering Mentor. Analyze review history and provide a direct, actionable 3-sentence growth summary. No introductory filler.';
     
-    const { content: insights } = await callGroq(systemPrompt, prompt, 0.5, 500);
+    const { content: insights } = await callGroq(
+      systemPrompt, 
+      prompt, 
+      0.5, 
+      settings.maxTokensPerReview, 
+      settings.defaultAiModel
+    );
 
     res.json({ insights });
   } catch (error) {
@@ -98,6 +133,11 @@ export const getDeveloperInsights = async (req, res) => {
 export const generateReviewEmail = async (req, res) => {
   const { reviewId } = req.body;
   try {
+    const settings = await getSettings();
+    if (settings.maintenanceMode) {
+      return res.status(503).json({ message: 'Platform is currently in Maintenance Mode. AI features are temporarily disabled.' });
+    }
+
     const review = await Review.findById(reviewId);
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
@@ -108,7 +148,13 @@ export const generateReviewEmail = async (req, res) => {
     The email should be addressed to "Team Lead" and should maintain a collaborative, expert tone.`;
     const systemPrompt = 'You are an elite Technical Communications Expert. Generate professional, data-driven email summaries of code reviews. Focus on impact and clarity. No filler.';
     
-    const { content: emailBody } = await callGroq(systemPrompt, prompt, 0.5, 1024);
+    const { content: emailBody } = await callGroq(
+      systemPrompt, 
+      prompt, 
+      0.5, 
+      1024, 
+      settings.defaultAiModel
+    );
 
     res.json({ emailBody });
   } catch (error) {

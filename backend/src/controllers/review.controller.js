@@ -224,6 +224,28 @@ export const getReviewById = async (req, res) => {
     if (!review) {
       return res.status(404).json({ message: 'Review not found' });
     }
+
+    // RBAC Guard: Only Owner or Admin can view
+    const isOwner = review.user?._id?.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Access denied: You do not have permission to view this analysis.' });
+    }
+
+    // Industry Standard: If an Admin audits another user's code, record it in the Audit Trail
+    if (isAdmin && !isOwner) {
+      const AuditLog = (await import('../models/AuditLog.model.js')).default;
+      await AuditLog.create({
+        action: 'INSPECT_CODE',
+        actor: req.user._id,
+        targetUser: review.user._id,
+        details: `Inspected code-level analysis for review: ${review.title}`,
+        metadata: { reviewId: review._id },
+        ipAddress: req.ip || req.connection.remoteAddress
+      });
+    }
+
     res.json(review);
   } catch (error) {
     console.error(error);

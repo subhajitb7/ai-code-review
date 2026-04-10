@@ -11,7 +11,7 @@ const sendEmail = async (to, subject, html) => {
     });
 
     await transporter.sendMail({
-      from: `"AICodeReview Platform" <${process.env.EMAIL_USER}>`,
+      from: `"Syncodalyze AI Platform" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
@@ -26,10 +26,10 @@ const sendEmail = async (to, subject, html) => {
 };
 
 export const sendOtpEmail = async (email, otp) => {
-  const subject = 'Your AICodeReview Verification Code';
+  const subject = 'Your Syncodalyze AI Verification Code';
   const html = `
     <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #2563eb;">AICodeReview Verification</h2>
+      <h2 style="color: #2563eb;">Syncodalyze AI Verification</h2>
       <p>Your verification code is:</p>
       <div style="background: #f0f4ff; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
         <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1d4ed8;">${otp}</span>

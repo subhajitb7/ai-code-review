@@ -20,7 +20,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Teams from './pages/Teams';
 import TeamDetail from './pages/TeamDetail';
-import AiLogs from './pages/AiLogs';
 import Profile from './pages/Profile';
 import SecurityUpdate from './pages/SecurityUpdate';
 import AiChatFloating from './components/AiChatFloating';
@@ -70,7 +69,6 @@ function AppContent() {
             <Route path="/analytics" element={<PrivateRoute><Analytics /></PrivateRoute>} />
             <Route path="/teams" element={<PrivateRoute><Teams /></PrivateRoute>} />
             <Route path="/teams/:id" element={<PrivateRoute><TeamDetail /></PrivateRoute>} />
-            <Route path="/ai-logs" element={<PrivateRoute><AiLogs /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
           </Routes>

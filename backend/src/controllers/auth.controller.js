@@ -22,6 +22,10 @@ export const authUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({ message: 'Account Suspended: Please contact support for assistance.' });
+    }
+
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       console.warn(`[AUTH] REJECTED: Password mismatch for user: ${email}`);
@@ -134,9 +138,19 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'OTP has expired. Please resend.' });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({ message: 'Account Suspended: Please contact support for assistance.' });
+    }
+
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpiry = undefined;
+    
+    // Auto-Elevation Hook for Primary Admin
+    if (user.email === process.env.MASTER_ADMIN_EMAIL) {
+      user.role = 'admin';
+    }
+    
     await user.save();
 
     generateToken(res, user._id);
@@ -145,6 +159,7 @@ export const verifyOtp = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      isMaster: user.email === process.env.MASTER_ADMIN_EMAIL,
     });
   } catch (error) {
     console.error(error);
@@ -187,12 +202,25 @@ export const logoutUser = (req, res) => {
 // @access  Private
 export const getUserProfile = async (req, res) => {
   const user = await User.findById(req.user._id);
+  
   if (user) {
+    if (user.isSuspended) {
+      return res.status(403).json({ message: 'Account Suspended: Please contact support for assistance.' });
+    }
+
+    // Auto-Elevation Hook for Primary Admin (Session Refresh)
+    if (user.email === process.env.MASTER_ADMIN_EMAIL && user.role !== 'admin') {
+      user.role = 'admin';
+      user.isVerified = true;
+      await user.save();
+    }
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      isMaster: user.email === process.env.MASTER_ADMIN_EMAIL,
     });
   } else {
     res.status(404).json({ message: 'User not found' });
@@ -325,6 +353,10 @@ export const verify2fa = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    if (user.isSuspended) {
+      return res.status(403).json({ message: 'Account Suspended: Please contact support for assistance.' });
+    }
+
     if (!user.otp || user.otp !== otp) {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
@@ -335,6 +367,13 @@ export const verify2fa = async (req, res) => {
 
     user.otp = undefined;
     user.otpExpiry = undefined;
+
+    // Auto-Elevation Hook for Primary Admin
+    if (user.email === process.env.MASTER_ADMIN_EMAIL) {
+      user.role = 'admin';
+      user.isVerified = true;
+    }
+
     await user.save();
 
     generateToken(res, user._id);
@@ -343,6 +382,7 @@ export const verify2fa = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      isMaster: user.email === process.env.MASTER_ADMIN_EMAIL,
       mustUpdatePassword: user.mustUpdatePassword
     });
   } catch (error) {
