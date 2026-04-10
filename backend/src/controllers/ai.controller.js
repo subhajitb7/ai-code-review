@@ -10,6 +10,13 @@ export const summarizeFile = async (req, res) => {
     const file = await CodeFile.findById(fileId);
     if (!file) return res.status(404).json({ message: 'File not found' });
 
+    // Caching check: If an AI summary already exists for the current version, return it instantly
+    const currentV = file.versions.find(v => Number(v.versionNumber) === Number(file.currentVersion));
+    if (currentV && currentV.aiSummary) {
+      console.log(`Serving cached summary for file ${fileId} v${file.currentVersion}`);
+      return res.json({ summary: currentV.aiSummary });
+    }
+
     const prompt = `Summarize the logic and purpose of the following code in exactly 3 concise bullet points. Be technical but understandable.\n\nFilename: ${file.filename}\nCode:\n\`\`\`${file.language}\n${file.content}\n\`\`\``;
     const systemPrompt = 'You are an elite Technical Architect. Summarize code logic with extreme precision and technical density. No conversational filler.';
     

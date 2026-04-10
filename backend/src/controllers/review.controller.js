@@ -237,15 +237,13 @@ export const getReviewById = async (req, res) => {
 export const getReviewStats = async (req, res) => {
   try {
     const userId = req.user._id;
-    // Only count ad-hoc (scratchpad) reviews for dashboard stats
-    const filter = { user: userId, fileId: { $exists: false } };
-    
-    const totalReviews = await Review.countDocuments(filter);
+    // Industry Standard: Stats should show Global Impact (Projects + Ad-Hoc)
+    const totalReviews = await Review.countDocuments({ user: userId });
     const bugsAgg = await Review.aggregate([
-      { $match: { user: userId, fileId: { $exists: false } } },
+      { $match: { user: userId } },
       { $group: { _id: null, totalBugs: { $sum: '$bugsFound' } } },
     ]);
-    const cleanReviews = await Review.countDocuments({ ...filter, bugsFound: 0 });
+    const cleanReviews = await Review.countDocuments({ user: userId, bugsFound: 0 });
     const cleanPercent = totalReviews > 0 ? Math.round((cleanReviews / totalReviews) * 100) : 100;
 
     res.json({

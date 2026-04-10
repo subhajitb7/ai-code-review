@@ -99,3 +99,62 @@ export const getFileHistory = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// @desc    Restore file to a previous version
+// @route   POST /api/files/:id/restore
+// @access  Private
+export const restoreFileVersion = async (req, res) => {
+  try {
+    const { versionNumber } = req.body;
+    
+    if (!versionNumber) {
+      return res.status(400).json({ message: 'Version number is required' });
+    }
+
+    const file = await CodeFile.findById(req.params.id);
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Check project permissions
+    const access = await getProjectAccess(file.project, req.user._id);
+    if (!access.exists || !access.canEdit) {
+      return res.status(403).json({ message: 'Not authorized to edit this file' });
+    }
+
+    // Find the targeted version
+    const versionToRestore = file.versions.find(v => Number(v.versionNumber) === Number(versionNumber));
+    if (!versionToRestore) {
+      return res.status(404).json({ message: 'Target version not found' });
+    }
+
+    const newVersion = file.currentVersion + 1;
+    
+    // Create new version with OLD content
+    file.content = versionToRestore.content;
+    file.currentVersion = newVersion;
+    file.versions.push({
+      versionNumber: newVersion,
+      content: versionToRestore.content,
+      updatedBy: req.user._id,
+    });
+    file.updatedBy = req.user._id;
+
+    await file.save();
+
+    // Notification
+    if (access.project.owner.toString() !== req.user._id.toString()) {
+      await Notification.create({
+        user: access.project.owner,
+        type: 'file_updated',
+        message: `Member ${req.user.name} restored "${file.filename}" to v${versionNumber} (New v${newVersion}).`,
+        link: `/projects/${access.project._id}/files/${file._id}`,
+      });
+    }
+
+    res.json(file);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

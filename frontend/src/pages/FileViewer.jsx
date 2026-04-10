@@ -30,34 +30,33 @@ const FileViewer = () => {
   const [saving, setSaving] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
   const [summary, setSummary] = useState('');
+  const [viewingVersion, setViewingVersion] = useState(null);
+
+  const loadVersionData = (v) => {
+    if (!v) return;
+    console.log('Synchronizing view to version:', v.versionNumber);
+    setViewingVersion(v);
+    setEditedContent(v.content);
+    setReviewResult(v.reviewId || null);
+    setIsEditing(false); // Historical versions are read-only
+  };
 
   useEffect(() => {
     const fetchFile = async () => {
       try {
         console.log('Fetching file data for:', fileId);
         const { data } = await axios.get(`/api/files/${fileId}`);
-        console.log('File data received:', data);
-        
         setFile(data);
-        setEditedContent(data.content);
-
-        // Auto-load AI results - find by version number or fall back to latest in array
+        
+        // Load default current version
         let currentV = data.versions.find(v => v.versionNumber === data.currentVersion);
         if (!currentV && data.versions.length > 0) {
-           currentV = data.versions[data.versions.length - 1]; // Fallback to last item
+           currentV = data.versions[data.versions.length - 1];
         }
 
-        console.log('Current version identified for analysis:', currentV);
-
         if (currentV) {
-          if (currentV.reviewId) {
-             console.log('Found persistent review result:', currentV.reviewId);
-             setReviewResult(currentV.reviewId);
-          }
-          if (currentV.aiSummary) {
-             console.log('Found persistent AI summary:', currentV.aiSummary);
-             setSummary(currentV.aiSummary);
-          }
+           loadVersionData(currentV);
+           setViewingVersion(null); // Indicates current "Live" version
         }
       } catch (err) {
         console.error('FileViewer Load Error:', err);
@@ -75,15 +74,33 @@ const FileViewer = () => {
     try {
       const { data } = await axios.post('/api/reviews/analyze', {
         title: file.filename,
-        codeSnippet: file.content,
+        codeSnippet: editedContent,
         language: file.language,
-        fileId: file._id, // Pass fileId for persistence
+        fileId: file._id,
       });
       setReviewResult(data);
     } catch (err) {
       console.error(err);
     } finally {
       setReviewing(false);
+    }
+  };
+
+  const handleRestore = async (v) => {
+    if (!window.confirm(`Are you sure you want to restore Version ${v.versionNumber}? This will create a new version of the file.`)) return;
+    
+    setSaving(true);
+    try {
+      const { data } = await axios.post(`/api/files/${fileId}/restore`, { versionNumber: v.versionNumber });
+      setFile(data);
+      // After restore, load the new version
+      const restoredV = data.versions.find(ver => ver.versionNumber === data.currentVersion);
+      loadVersionData(restoredV);
+      setViewingVersion(null);
+    } catch (err) {
+      console.error('Restore Error:', err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -107,6 +124,22 @@ const FileViewer = () => {
       console.error(err);
     } finally {
       setSummarizing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { data } = await axios.put(`/api/files/${fileId}`, { content: editedContent });
+      setFile(data);
+      loadVersionData(data.versions.find(v => v.versionNumber === data.currentVersion));
+      setViewingVersion(null);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Save Error:', err);
+      alert('Failed to save file.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -143,11 +176,23 @@ const FileViewer = () => {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-sec">v{file.currentVersion} · {file.language}</p>
+              <p className="text-xs text-sec">v{viewingVersion ? viewingVersion.versionNumber : file.currentVersion} · {file.language} {viewingVersion && <span className="ml-2 text-primary-500 font-bold uppercase">(Preview Mode)</span>}</p>
             </div>
           </div>
           <div className="flex gap-3">
-            {!isEditing ? (
+            {viewingVersion ? (
+              <>
+                 <button onClick={() => {
+                   const latest = file.versions.find(v => v.versionNumber === file.currentVersion);
+                   loadVersionData(latest);
+                   setViewingVersion(null);
+                 }} className="btn-secondary text-sm font-bold">Back to Latest</button>
+                 <button onClick={() => handleRestore(viewingVersion)} disabled={saving} className="btn-primary flex items-center gap-2 text-sm font-bold">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
+                    Restore this Version
+                 </button>
+              </>
+            ) : !isEditing ? (
               <>
                 <button onClick={fetchHistory} className="btn-secondary flex items-center gap-2 text-sm font-bold">
                   <GitBranch className="h-4 w-4" /> History
@@ -276,7 +321,7 @@ const FileViewer = () => {
 
       {/* Version History Sidebar */}
       {showHistory && history && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-end z-50">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-end z-[999]">
           <div className="glass-panel w-96 h-full p-6 overflow-y-auto border-l border-col shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold flex items-center gap-2 text-main"><Clock className="h-5 w-5 text-primary-600" /> Version History</h3>
@@ -284,11 +329,25 @@ const FileViewer = () => {
             </div>
             <div className="space-y-3">
               {history.versions.slice().reverse().map((v) => (
-                <div key={v._id} className={`p-4 rounded-lg border transition-all ${v.versionNumber === history.currentVersion ? 'border-primary-500 bg-primary-500/10 shadow-sm' : 'border-col bg-ter/50 hover:bg-ter'}`}>
+                <div 
+                  key={v._id} 
+                  onClick={() => {
+                    loadVersionData(v);
+                    if (v.versionNumber === file.currentVersion) {
+                      setViewingVersion(null);
+                    }
+                    setShowHistory(false);
+                  }}
+                  className={`p-4 rounded-lg border transition-all cursor-pointer group ${
+                    (viewingVersion?.versionNumber === v.versionNumber || (!viewingVersion && v.versionNumber === file.currentVersion)) 
+                      ? 'border-primary-500 bg-primary-500/10 shadow-sm' 
+                      : 'border-col bg-ter/50 hover:border-primary-500/30'
+                  }`}
+                >
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-main">Version {v.versionNumber}</span>
-                    {v.versionNumber === history.currentVersion && (
-                      <span className="text-[10px] bg-primary-500/20 text-primary-600 px-2 py-0.5 rounded border border-primary-500/30 font-bold uppercase tracking-wider">Current</span>
+                    <span className="font-bold text-main group-hover:text-primary-500 transition-colors">Version {v.versionNumber}</span>
+                    {(v.versionNumber === file.currentVersion) && (
+                      <span className="text-[10px] bg-primary-500/20 text-primary-600 px-2 py-0.5 rounded border border-primary-500/30 font-bold uppercase tracking-wider">Latest</span>
                     )}
                   </div>
                   <div className="flex justify-between items-start mt-1">

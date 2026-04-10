@@ -223,7 +223,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <History className="h-5 w-5 text-primary-500" />
-              <h2 className="text-xl font-bold text-main">Recent Reviews</h2>
+              <h2 className="text-xl font-bold text-main">Quick Analysis History</h2>
             </div>
             <Link to="/reviews" className="text-xs font-bold text-primary-500 hover:text-primary-600 transition-colors flex items-center gap-1 group">
               View All History <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
@@ -265,7 +265,7 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReviews.slice(0, 3).map((review) => (
+            {filteredReviews.slice(0, 6).map((review) => (
               <Link
                 key={review._id}
                 to={`/review/${review._id}`}
