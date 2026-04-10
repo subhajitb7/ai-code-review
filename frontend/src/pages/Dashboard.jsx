@@ -225,9 +225,6 @@ const Dashboard = () => {
               <History className="h-5 w-5 text-primary-500" />
               <h2 className="text-xl font-bold text-main">Quick Analysis History</h2>
             </div>
-            <Link to="/reviews" className="text-xs font-bold text-primary-500 hover:text-primary-600 transition-colors flex items-center gap-1 group">
-              View All History <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
           </div>
           {/* Filter */}
           <div className="flex gap-2">

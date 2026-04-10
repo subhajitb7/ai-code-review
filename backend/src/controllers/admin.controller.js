@@ -52,7 +52,7 @@ export const deleteUser = async (req, res) => {
     await Comment.deleteMany({ user: user._id });
     await Notification.deleteMany({ user: user._id });
     await User.findByIdAndDelete(req.params.id);
-    
+
     // Create Audit Log
     await AuditLog.create({
       action: 'DELETE_USER',
@@ -161,11 +161,11 @@ export const getAdminStats = async (req, res) => {
           _id: null,
           totalTokens: { $sum: '$tokensUsed' },
           avgResponseTime: { $avg: '$responseTimeMs' },
-          successCount: { 
-            $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] } 
+          successCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }
           },
-          errorCount: { 
-            $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] } 
+          errorCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] }
           },
           totalRequests: { $sum: 1 }
         }
