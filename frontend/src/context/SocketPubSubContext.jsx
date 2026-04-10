@@ -15,7 +15,7 @@ export const SocketPubSubProvider = ({ children }) => {
   // Initialize Socket
   useEffect(() => {
     if (user && !socket) {
-      const SOCKET_URL = window.location.hostname === 'localhost' ? 'http://localhost:5001' : `http://${window.location.hostname}:5001`;
+      const SOCKET_URL = window.location.hostname === 'localhost' ? 'http://localhost:5005' : `http://${window.location.hostname}:5005`;
       const s = io(SOCKET_URL, {
         withCredentials: true,
         reconnection: true,
