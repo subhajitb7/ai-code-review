@@ -69,7 +69,7 @@ const ReviewHistory = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3 text-main">
-            <History className="h-8 w-8 text-primary-500" /> Review Vault
+            <History className="h-8 w-8 text-primary-500" /> Code Insights
           </h1>
           <p className="text-sec mt-1 font-medium italic">Manage all quick code AI code analyses.</p>
         </div>

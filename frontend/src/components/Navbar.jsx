@@ -57,8 +57,8 @@ const Navbar = () => {
   const primaryLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/projects', label: 'Projects', icon: FolderOpen },
-    { to: '/reviews', label: 'Review Vault', icon: History },
     { to: '/teams', label: 'Teams', icon: Users },
+    { to: '/reviews', label: 'Code Insights', icon: History },
     { to: '/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/ai-logs', label: 'AI Logs', icon: Brain },
   ];
