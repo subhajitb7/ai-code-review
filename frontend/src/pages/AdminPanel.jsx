@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Users, FileText, Trash2, Shield, ShieldOff, BarChart3, Bug, FolderOpen, MessageSquare } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const AdminPanel = () => {
   const { theme } = useContext(ThemeContext);
@@ -12,6 +13,14 @@ const AdminPanel = () => {
   const initialTab = searchParams.get('tab') || 'stats';
   const [tab, setTab] = useState(initialTab);
   const [stats, setStats] = useState(null);
+
+  // Unified Confirmation State
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
   // Sync tab state with URL search params
   useEffect(() => {
@@ -45,14 +54,20 @@ const AdminPanel = () => {
     fetchData();
   }, [tab]);
 
-  const handleDeleteUser = async (id) => {
-    if (!confirm('Delete this user and ALL their data?')) return;
-    try {
-      await axios.delete(`/api/admin/users/${id}`);
-      setUsers(users.filter((u) => u._id !== id));
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error');
-    }
+  const handleDeleteUser = (id) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Delete User?",
+      message: "This will permanently delete the user account and ALL their associated data. This action cannot be undone.",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/admin/users/${id}`);
+          setUsers(users.filter((u) => u._id !== id));
+        } catch (err) {
+          alert(err.response?.data?.message || 'Error');
+        }
+      }
+    });
   };
 
   const handleToggleRole = async (id, currentRole) => {
@@ -65,14 +80,20 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDeleteReview = async (id) => {
-    if (!confirm('Delete this review?')) return;
-    try {
-      await axios.delete(`/api/admin/reviews/${id}`);
-      setReviews(reviews.filter((r) => r._id !== id));
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error');
-    }
+  const handleDeleteReview = (id) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Delete Review?",
+      message: "Are you sure you want to remove this review from the system?",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/admin/reviews/${id}`);
+          setReviews(reviews.filter((r) => r._id !== id));
+        } catch (err) {
+          alert(err.response?.data?.message || 'Error');
+        }
+      }
+    });
   };
 
   const tabs = [
@@ -252,6 +273,14 @@ const AdminPanel = () => {
           )}
         </>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+      />
     </div>
   );
 };

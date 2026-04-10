@@ -4,6 +4,7 @@ import { Send, Trash2, User, CheckSquare, Square, Pencil, Check, X, ListTodo, Mi
 import useSpeechToText from '../hooks/useSpeechToText';
 import { AuthContext } from '../context/AuthContext';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
+import ConfirmModal from './ConfirmModal';
 
 const CommentSection = ({
   reviewId,
@@ -22,6 +23,10 @@ const CommentSection = ({
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
+
+  // Deletion State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
   useEffect(() => {
     if (transcript) setText(transcript);
@@ -101,10 +106,17 @@ const CommentSection = ({
     }
   };
 
-  const handleDelete = async (commentId) => {
+  const handleDeleteTrigger = (commentId) => {
+    setCommentToDelete(commentId);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!commentToDelete) return;
     try {
-      await axios.delete(`/api/comments/${commentId}`);
+      await axios.delete(`/api/comments/${commentToDelete}`);
       fetchComments();
+      setCommentToDelete(null);
     } catch (err) {
       console.error(err);
     }
@@ -194,7 +206,7 @@ const CommentSection = ({
                   )}
                   {(comment.user?._id === user._id || userRole === 'admin' || userRole === 'owner') && (
                     <button
-                      onClick={() => handleDelete(comment._id)}
+                      onClick={() => handleDeleteTrigger(comment._id)}
                       className="p-1.5 text-sec hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                       title="Delete Comment"
                     >
@@ -246,6 +258,14 @@ const CommentSection = ({
           </div>
         </div>
       </form>
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Comment?"
+        message="Are you sure you want to remove this project note or discussion point?"
+      />
     </div>
   );
 };

@@ -3,12 +3,17 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Users, Plus, X, Trash2, FolderOpen, Crown, ShieldCheck, User as UserIcon, UsersRound } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
+import ConfirmModal from '../components/ConfirmModal';
 
 const Teams = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
+  
+  // Deletion State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState(null);
 
   const fetchTeams = async () => {
     try {
@@ -35,11 +40,17 @@ const Teams = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this team?')) return;
+  const handleDeleteTrigger = (id) => {
+    setTeamToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!teamToDelete) return;
     try {
-      await axios.delete(`/api/teams/${id}`);
-      setTeams(teams.filter((t) => t._id !== id));
+      await axios.delete(`/api/teams/${teamToDelete}`);
+      setTeams(teams.filter((t) => t._id !== teamToDelete));
+      setTeamToDelete(null);
     } catch (err) {
       alert(err.response?.data?.message || 'Error');
     }
@@ -98,7 +109,7 @@ const Teams = () => {
                   </div>
                 </div>
                 <button
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(team._id); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteTrigger(team._id); }}
                   className="p-1.5 text-sec hover:text-red-500 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -150,6 +161,14 @@ const Teams = () => {
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Team?"
+        message="This will permanently delete the team and remove all member associations. This action cannot be undone."
+      />
     </div>
   );
 };

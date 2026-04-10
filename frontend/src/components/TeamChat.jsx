@@ -4,6 +4,7 @@ import { Send, Trash2, Pencil, Mic, MicOff } from 'lucide-react';
 import useSpeechToText from '../hooks/useSpeechToText';
 import { AuthContext } from '../context/AuthContext';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
+import ConfirmModal from './ConfirmModal';
 
 const TeamChat = ({
   teamId,
@@ -19,6 +20,10 @@ const TeamChat = ({
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
+
+  // Deletion State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   useEffect(() => {
     if (transcript) setText(transcript);
@@ -92,10 +97,17 @@ const TeamChat = ({
     }
   };
 
-  const handleDelete = async (messageId) => {
+  const handleDeleteTrigger = (messageId) => {
+    setMessageToDelete(messageId);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!messageToDelete) return;
     try {
-      await axios.delete(`/api/messages/${messageId}`);
+      await axios.delete(`/api/messages/${messageToDelete}`);
       fetchMessages();
+      setMessageToDelete(null);
     } catch (err) {
       console.error(err);
     }
@@ -175,7 +187,7 @@ const TeamChat = ({
                   )}
                   {(msg.user?._id === user._id || userRole === 'admin' || userRole === 'owner') && (
                     <button
-                      onClick={() => handleDelete(msg._id)}
+                      onClick={() => handleDeleteTrigger(msg._id)}
                       className="p-1 text-sec hover:text-red-400 transition-all"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -224,6 +236,14 @@ const TeamChat = ({
           </div>
         </div>
       </form>
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message?"
+        message="Are you sure you want to remove this message from the discussion?"
+      />
     </div>
   );
 };

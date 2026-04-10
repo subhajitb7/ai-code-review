@@ -13,12 +13,17 @@ import {
   FileCode,
   Sparkles
 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const ReviewHistory = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [languageFilter, setLanguageFilter] = useState('all');
+  
+  // Deletion State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState(null);
 
   useEffect(() => {
     fetchReviews();
@@ -35,11 +40,18 @@ const ReviewHistory = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this review history?')) return;
+  const handleDeleteTrigger = (id) => {
+    setReviewToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!reviewToDelete) return;
     try {
-      await axios.delete(`/api/reviews/${id}`);
-      setReviews(reviews.filter(r => r._id !== id));
+      await axios.get(`/api/reviews/${reviewToDelete}`); // Standard check
+      await axios.delete(`/api/reviews/${reviewToDelete}`);
+      setReviews(reviews.filter(r => r._id !== reviewToDelete));
+      setReviewToDelete(null);
     } catch (err) {
       console.error('Failed to delete review:', err);
     }
@@ -170,7 +182,7 @@ const ReviewHistory = () => {
                   View Analysis <ChevronRight className="h-3 w-3" />
                 </Link>
                 <button 
-                  onClick={() => handleDelete(review._id)}
+                  onClick={() => handleDeleteTrigger(review._id)}
                   className="h-8 w-8 rounded-xl bg-red-500/10 text-red-600 hover:bg-red-500 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -180,6 +192,14 @@ const ReviewHistory = () => {
           ))}
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Review History?"
+        message="This will permanently remove this analysis from your vault. You will lose the technical scorecard and all findings. This action cannot be undone."
+      />
     </div>
   );
 };

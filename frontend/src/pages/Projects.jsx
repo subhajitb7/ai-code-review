@@ -3,12 +3,17 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FolderOpen, Plus, Trash2, FileCode, X } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
+import ConfirmModal from '../components/ConfirmModal';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', language: 'javascript', repoUrl: '' });
+  
+  // Deletion State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
 
   const fetchProjects = async () => {
     try {
@@ -35,11 +40,17 @@ const Projects = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this project and all its files?')) return;
+  const handleDeleteTrigger = (id) => {
+    setProjectToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
     try {
-      await axios.delete(`/api/projects/${id}`);
+      await axios.delete(`/api/projects/${projectToDelete}`);
       fetchProjects();
+      setProjectToDelete(null);
     } catch (err) {
       console.error(err);
     }
@@ -99,7 +110,7 @@ const Projects = () => {
                   </div>
                 </div>
                 <button
-                  onClick={(e) => { e.preventDefault(); handleDelete(proj._id); }}
+                  onClick={(e) => { e.preventDefault(); handleDeleteTrigger(proj._id); }}
                   className="p-2 text-sec hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -163,6 +174,14 @@ const Projects = () => {
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Project?"
+        message="This will permanently remove the project and all its associated analysis files. This action cannot be undone."
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ArrowLeft, Users, Trash2, Crown, ShieldCheck, User as UserIcon, FolderOpen, X, UserPlus, MessageSquare } from 'lucide-react';
 import TeamChatDrawer from '../components/TeamChatDrawer';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 const TeamDetail = () => {
   const { id } = useParams();
@@ -17,6 +18,14 @@ const TeamDetail = () => {
   const [myProjects, setMyProjects] = useState([]);
   const [error, setError] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Unified Confirmation State
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
   const fetchTeam = async () => {
     try {
@@ -47,14 +56,20 @@ const TeamDetail = () => {
     }
   };
 
-  const handleRemove = async (userId) => {
-    if (!confirm('Remove this member?')) return;
-    try {
-      const { data } = await axios.delete(`/api/teams/${id}/members/${userId}`);
-      setTeam(data);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error');
-    }
+  const handleRemove = (userId) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Remove Member?",
+      message: "Are you sure you want to remove this member from the team? They will lose access to team projects and chat.",
+      onConfirm: async () => {
+        try {
+          const { data } = await axios.delete(`/api/teams/${id}/members/${userId}`);
+          setTeam(data);
+        } catch (err) {
+          alert(err.response?.data?.message || 'Error');
+        }
+      }
+    });
   };
 
   const handleRoleChange = async (userId, newRole) => {
@@ -76,14 +91,20 @@ const TeamDetail = () => {
     }
   };
 
-  const handleRemoveProject = async (projectId) => {
-    if (!confirm('Un-link this project from the team?')) return;
-    try {
-      const { data } = await axios.delete(`/api/teams/${id}/projects/${projectId}`);
-      setTeam(data);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error');
-    }
+  const handleRemoveProject = (projectId) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Un-link Project?",
+      message: "This project will no longer be visible to the team, but it will remain in its owner's personal projects.",
+      onConfirm: async () => {
+        try {
+          const { data } = await axios.delete(`/api/teams/${id}/projects/${projectId}`);
+          setTeam(data);
+        } catch (err) {
+          alert(err.response?.data?.message || 'Error');
+        }
+      }
+    });
   };
 
   const openLinkProject = async () => {
@@ -296,6 +317,14 @@ const TeamDetail = () => {
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+      />
     </div>
   );
 };

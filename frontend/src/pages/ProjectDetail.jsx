@@ -11,6 +11,7 @@ import Editor from '@monaco-editor/react';
 import { ThemeContext } from '../context/ThemeContext';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
 import CommentSection from '../components/CommentSection';
+import ConfirmModal from '../components/ConfirmModal';
 
 const ProjectDetail = () => {
   const { theme } = useContext(ThemeContext);
@@ -30,6 +31,14 @@ const ProjectDetail = () => {
   const [uploadQueue, setUploadQueue] = useState([]); // New Bulk Queue
   const [isBulkMode, setIsBulkMode] = useState(false);
   const [userRole, setUserRole] = useState('member');
+
+  // Unified Confirmation State
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
   const { subscribe, socket } = useContext(SocketPubSubContext);
 
@@ -221,26 +230,38 @@ const ProjectDetail = () => {
     }
   };
 
-  const handleDeleteProject = async () => {
-    if (!confirm('Are you sure you want to delete this project? This will permanently remove all files and results.')) return;
-    try {
-      await axios.delete(`/api/projects/${id}`);
-      navigate('/projects');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete project');
-    }
+  const handleDeleteProject = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Delete Project?",
+      message: "This will permanently remove all files and analysis results. This action cannot be undone.",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/projects/${id}`);
+          navigate('/projects');
+        } catch (err) {
+          alert(err.response?.data?.message || 'Failed to delete project');
+        }
+      }
+    });
   };
 
-  const handleDeleteFile = async (e, fileId) => {
+  const handleDeleteFile = (e, fileId) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this file?')) return;
-    try {
-      await axios.delete(`/api/projects/${id}/files/${fileId}`);
-      fetchProject();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete file');
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: "Delete File?",
+      message: "Are you sure you want to delete this file from the project?",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`/api/projects/${id}/files/${fileId}`);
+          fetchProject();
+        } catch (err) {
+          alert(err.response?.data?.message || 'Failed to delete file');
+        }
+      }
+    });
   };
 
   const handleFileRead = (e) => {
@@ -587,6 +608,14 @@ const ProjectDetail = () => {
         </div>
       )}
 
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+      />
     </div>
   );
 };
