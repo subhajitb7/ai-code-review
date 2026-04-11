@@ -498,9 +498,7 @@ const AdminPanel = () => {
                             <div>
                               <p className="font-bold text-main flex items-center gap-2">
                                 {u.name}
-                                {u.isMaster ? (
-                                  <span className="px-1.5 py-0.5 text-[9px] font-black bg-emerald-500/20 text-emerald-500 rounded uppercase border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]">Sovereign Master</span>
-                                ) : currentUser?._id === u._id && (
+                                {currentUser?._id === u._id && (
                                   <span className="px-1.5 py-0.5 text-[9px] font-bold bg-primary-500/10 text-primary-500 rounded uppercase border border-primary-500/20">You</span>
                                 )}
                               </p>
@@ -514,7 +512,11 @@ const AdminPanel = () => {
                         </td>
                         <td className="p-4 text-sec font-medium">{u.email}</td>
                         <td className="p-4">
-                          <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20' : 'bg-sec text-sec border border-col'}`}>{u.role}</span>
+                          {u.isMaster ? (
+                            <span className="px-2 py-1 text-[9px] font-black bg-emerald-500/20 text-emerald-500 rounded-full uppercase border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]">Sovereign Master</span>
+                          ) : (
+                            <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-full ${u.role === 'admin' ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20' : 'bg-sec text-sec border border-col'}`}>{u.role}</span>
+                          )}
                         </td>
                         <td className="p-4">
                           <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${u.isSuspended ? 'text-rose-500' : u.isVerified ? 'text-emerald-500' : 'text-orange-500'}`}>
