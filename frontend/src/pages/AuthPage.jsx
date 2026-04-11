@@ -125,7 +125,10 @@ const AuthPage = () => {
         </div>
 
         <a 
-          href="http://localhost:5001/api/auth/github" 
+          href={`${
+            window.location.hostname === "localhost" 
+            ? "http://localhost:5001" 
+            : "https://api.subhajitbag.in"}/api/auth/github`}
           className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-col bg-ter hover:bg-sec hover:border-text-main transition-all font-bold text-main group shadow-sm"
         >
           <GithubIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
