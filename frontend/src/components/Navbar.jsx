@@ -13,11 +13,9 @@ const Navbar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const [adminOpen, setAdminOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const adminRef = useRef(null);
   const userMenuRef = useRef(null);
 
   const handleLogout = () => {
@@ -28,7 +26,6 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleOutside = (e) => {
-      if (adminRef.current && !adminRef.current.contains(e.target)) setAdminOpen(false);
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
     };
     document.addEventListener('mousedown', handleOutside);
@@ -53,7 +50,6 @@ const Navbar = () => {
     );
   };
 
-  // Primary links always visible for core productivity
   const primaryLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/projects', label: 'Projects', icon: FolderOpen },
@@ -84,42 +80,16 @@ const Navbar = () => {
             {user && (
               <div className="hidden lg:flex items-center justify-center gap-6">
                 {primaryLinks.map((l) => <NavLink key={l.to} {...l} />)}
-
-                {/* Admin dropdown integration */}
                 {isAdmin && (
-                  <div className="relative" ref={adminRef}>
-                    <button onClick={() => setAdminOpen(!adminOpen)}
-                      className={`flex items-center gap-1.5 text-sm font-medium px-2.5 py-1 rounded-md transition-all ${isActive('/admin')
-                        ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
-                        : 'text-yellow-400/80 hover:bg-yellow-500/10 hover:text-yellow-400'
-                        }`}>
-                      <Shield className="h-3.5 w-3.5" /> Admin
-                      <ChevronDown className={`h-3 w-3 transition-transform ${adminOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    {adminOpen && (
-                      <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-52 glass-panel shadow-2xl overflow-hidden z-50">
-                        <div className="px-3 py-2 border-b border-dark-700">
-                          <p className="text-[10px] uppercase text-yellow-500/60 font-semibold tracking-wider">Admin Controls</p>
-                        </div>
-                        {[
-                          { to: '/admin', label: 'Platform Stats', icon: BarChart3, desc: 'Overview metrics' },
-                          { to: '/admin?tab=users', label: 'Manage Users', icon: Users, desc: 'Roles & access' },
-                          { to: '/admin?tab=reviews', label: 'Manage Reviews', icon: FileText, desc: 'All reviews' },
-                        ].map((item) => (
-                          <Link key={item.label} to={item.to} onClick={() => setAdminOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 hover:bg-sec transition-colors group">
-                            <div className="h-8 w-8 bg-yellow-500/10 rounded-lg flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
-                              <item.icon className="h-4 w-4 text-yellow-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-main">{item.label}</p>
-                              <p className="text-[11px] text-sec font-medium">{item.desc}</p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <Link
+                    to="/admin"
+                    className={`flex items-center gap-1.5 text-sm font-medium px-2.5 py-1 rounded-md transition-all ${isActive('/admin')
+                      ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+                      : 'text-yellow-400/80 hover:bg-yellow-500/10 hover:text-yellow-400'
+                      }`}
+                  >
+                    <Shield className="h-3.5 w-3.5" /> Admin
+                  </Link>
                 )}
               </div>
             )}
