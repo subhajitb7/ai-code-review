@@ -91,5 +91,6 @@ cd frontend && npm install && npm run dev
 
 ---
 
+
 ### **Engineering Sovereignty — Developed by SUBHAJIT BAG**
 *Built with precision for the next generation of accountable AI intelligence.*
