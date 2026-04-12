@@ -8,7 +8,7 @@ export const SocketPubSubProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  
+
   // Storage for topic subscribers: topicName -> Set of callback functions
   const subscribers = useRef({});
 
@@ -17,8 +17,8 @@ export const SocketPubSubProvider = ({ children }) => {
     if (user && !socket) {
       const SOCKET_URL =
         window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:5007'
-    : 'https://api.subhajitbag.in';
+          ? 'http://127.0.0.1:5007'
+          : 'https://api.subhajitbag.in';
       const s = io(SOCKET_URL, {
         withCredentials: true,
         reconnection: true,
@@ -29,7 +29,7 @@ export const SocketPubSubProvider = ({ children }) => {
       s.on('connect', () => {
         setIsConnected(true);
         s.emit('join', user._id);
-        
+
         // Re-join any active rooms tracked in subscribers
         Object.keys(subscribers.current).forEach(topic => {
           if (topic.startsWith('project:') || topic.startsWith('review:')) {
@@ -44,13 +44,16 @@ export const SocketPubSubProvider = ({ children }) => {
 
       // Global Listener for Comments/Chat
       s.on('newComment', (data) => {
-        let topicId = '';
-        if (data.team) topicId = `team:${data.team}`;
-        else if (data.project) topicId = `project:${data.project}`;
-        else if (data.review) topicId = `review:${data.review}`;
-        
+        const topicId = data.review ? `review:${data.review}` : `project:${data.project}`;
         if (topicId && subscribers.current[topicId]) {
           subscribers.current[topicId].forEach(cb => cb({ type: 'NEW_MESSAGE', data }));
+        }
+      });
+
+      s.on('commentUpdated', (data) => {
+        const topicId = data.review ? `review:${data.review}` : `project:${data.project}`;
+        if (topicId && subscribers.current[topicId]) {
+          subscribers.current[topicId].forEach(cb => cb({ type: 'UPDATE_MESSAGE', data }));
         }
       });
 

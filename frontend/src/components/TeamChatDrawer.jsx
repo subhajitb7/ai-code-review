@@ -16,6 +16,7 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [typingUser, setTypingUser] = useState(null);
   const scrollRef = useRef(null);
+  const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
 
@@ -60,23 +61,21 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
       };
 
       socket.on('newTeamMessage', handleNewMessage);
-      socket.on('typing', handleTyping);
-      socket.on('stopTyping', handleStopTyping);
+      socket.on('userTyping', handleTyping);
+      socket.on('userStopTyping', handleStopTyping);
 
       return () => {
         socket.emit('leaveRoom', socketRoom);
         socket.off('newTeamMessage', handleNewMessage);
-        socket.off('typing', handleTyping);
-        socket.off('stopTyping', handleStopTyping);
+        socket.off('userTyping', handleTyping);
+        socket.off('userStopTyping', handleStopTyping);
       };
     }
   }, [teamId, socket, socketRoom, isOpen]);
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingUser, isOpen]);
 
   const handleTypingEvent = () => {
@@ -94,7 +93,8 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
     if (!text.trim()) return;
 
     try {
-      await axios.post(`/api/messages/${teamId}`, { text: text.trim() });
+      const { data } = await axios.post(`/api/messages/${teamId}`, { text: text.trim() });
+      setMessages(prev => [...prev, data]);
       setText('');
       if (socket) socket.emit('stopTyping', { roomId: socketRoom, userName: user.name });
     } catch (err) {
@@ -122,25 +122,20 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
         </button>
       </div>
 
-      {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 flex flex-col-reverse justify-end space-y-6 space-y-reverse scroll-smooth custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 flex flex-col space-y-4 scroll-smooth custom-scrollbar"
       >
-        {typingUser && (
-          <div className="px-11 flex items-center gap-2 animate-pulse mb-4">
-            <div className="flex gap-1">
-              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce"></span>
-              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+        {messages.length === 0 && !loading && (
+          <div className="flex flex-col items-center justify-center h-full text-center gap-2 opacity-40">
+            <Sparkles className="h-10 w-10 text-primary-500" />
+            <div>
+                 <p className="text-xs font-bold text-main">No discussion yet</p>
             </div>
-            <p className="text-[10px] font-bold text-primary-600 italic">
-              {typingUser} is typing...
-            </p>
           </div>
         )}
 
-        {[...messages].reverse().map((msg, index) => {
+        {messages.map((msg, index) => {
           const isMe = msg.user?._id === user?._id;
           
           return (
@@ -172,20 +167,25 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
             </div>
           );
         })}
-        
-        {messages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-4 opacity-40">
-            <Sparkles className="h-12 w-12 text-primary-500" />
-            <div>
-                 <p className="text-sm font-bold text-main">No discussion yet</p>
-                 <p className="text-xs font-medium text-sec mt-1">Start the conversation below.</p>
+
+        {typingUser && (
+          <div className="px-11 flex items-center gap-2 animate-pulse mt-4">
+            <div className="flex gap-1">
+              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce"></span>
+              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span className="w-1 h-1 bg-primary-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
             </div>
+            <p className="text-[10px] font-bold text-primary-600 italic">
+              {typingUser} is typing...
+            </p>
           </div>
         )}
+        
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Footer Area */}
-      <div className="p-6 border-t border-col bg-sec/30 backdrop-blur-md">
+      <div className="p-4 bg-sec/30 backdrop-blur-md">
         <form onSubmit={handleSendMessage} className="relative group">
           <textarea
             value={text}

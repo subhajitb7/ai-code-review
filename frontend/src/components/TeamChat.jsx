@@ -19,6 +19,8 @@ const TeamChat = ({
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
+  const scrollRef = useRef(null);
+  const messagesEndRef = useRef(null);
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
 
   // Deletion State
@@ -113,20 +115,16 @@ const TeamChat = ({
     }
   };
 
-  const scrollRef = useRef(null);
-
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
   return (
     <div>
       <div
         ref={scrollRef}
-        className="space-y-4 mb-8 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth"
+        className="space-y-4 mb-4 pb-6 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth"
       >
         {loading ? (
           <p className="text-sec text-sm italic py-4">Syncing team chat...</p>
@@ -198,10 +196,11 @@ const TeamChat = ({
             </div>
           ))
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="relative group">
+      <form onSubmit={handleSubmit} className="relative group mt-2">
         <div className="glass-panel p-2 flex items-end gap-2 border-col/40 group-focus-within:bg-sec/60 transition-all shadow-lg">
           <textarea
             value={text}

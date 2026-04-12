@@ -16,12 +16,13 @@ const CommentSection = ({
   userRole = 'member' // Pass role for admin powers
 }) => {
   const { user } = useContext(AuthContext);
-  const { socket } = useContext(SocketPubSubContext);
+  const { subscribe } = useContext(SocketPubSubContext);
   const [comments, setComments] = useState([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
+  const scrollRef = useRef(null);
   const { isListening, transcript, startListening, stopListening } = useSpeechToText();
 
   // Deletion State
@@ -51,39 +52,36 @@ const CommentSection = ({
     if (!contextId) return;
     fetchComments();
 
-    if (socket) {
-      socket.emit('joinRoom', socketRoom);
-
-      const handleNewComment = (newComment) => {
+    console.info(`[TELEMETRY] Subscribing to node: ${socketRoom}`);
+    const unsubscribe = subscribe(socketRoom, (event) => {
+      const { type, data } = event;
+      if (type === 'NEW_MESSAGE') {
         setComments((prev) => {
-          if (prev.find(c => c._id === newComment._id)) return prev;
-          return [...prev, newComment];
+          if (prev.find(c => c._id === data._id)) return prev;
+          console.log(`[TELEMETRY] NEW_MESSAGE pulse received for ${data._id}`);
+          return [...prev, data];
         });
-      };
+      } else if (type === 'UPDATE_MESSAGE') {
+        console.log(`[TELEMETRY] UPDATE_MESSAGE pulse received for ${data._id}`);
+        setComments((prev) => prev.map(c => c._id === data._id ? data : c));
+      }
+    });
 
-      const handleCommentUpdated = (updatedComment) => {
-        setComments((prev) => prev.map(c => c._id === updatedComment._id ? updatedComment : c));
-      };
-
-      socket.on('newComment', handleNewComment);
-      socket.on('commentUpdated', handleCommentUpdated);
-
-      return () => {
-        socket.emit('leaveRoom', socketRoom);
-        socket.off('newComment', handleNewComment);
-        socket.off('commentUpdated', handleCommentUpdated);
-      };
-    }
-  }, [contextId, socket, socketRoom]);
+    return () => {
+      console.info(`[TELEMETRY] Unsubscribing from node: ${socketRoom}`);
+      unsubscribe();
+    };
+  }, [contextId, socketRoom, subscribe]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
 
     try {
-      await axios.post(`/api/${contextType}/${contextId}/comments`, {
+      const { data } = await axios.post(`/api/${contextType}/${contextId}/comments`, {
         text: text.trim(),
       });
+      setComments(prev => [...prev, data]);
       setText('');
     } catch (err) {
       console.error('Failed to post comment:', err);
@@ -121,8 +119,6 @@ const CommentSection = ({
     }
   };
 
-  const scrollRef = useRef(null);
-
   // Auto-scroll to bottom on new comments
   useEffect(() => {
     if (scrollRef.current) {
@@ -135,7 +131,7 @@ const CommentSection = ({
       {/* List - Scrollable Viewport (Sized for ~4 comments) */}
       <div
         ref={scrollRef}
-        className="space-y-4 mb-8 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth"
+        className="space-y-4 mb-4 pb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar scroll-smooth"
       >
         {loading ? (
           <p className="text-sec text-sm italic py-4">Loading insights...</p>
@@ -148,20 +144,19 @@ const CommentSection = ({
             <div
               key={comment._id}
               className={`flex gap-3 p-4 glass-panel transition-all group border-col/30 ${isNotes
-                  ? 'bg-sec/30 hover:bg-sec/50'
-                  : 'hover:bg-sec/20 shadow-sm'
+                ? 'bg-sec/30 hover:bg-sec/50'
+                : 'hover:bg-sec/20 shadow-sm'
                 }`}
             >
 
               <div className="flex-1 min-w-0">
                 {/* Header for Context - Sequential Grouping (Rock Solid Consistency) */}
                 <div className="flex items-center gap-2 mb-1 h-4 overflow-hidden">
-                  <span className={`font-black text-[10px] uppercase tracking-tighter truncate max-w-[120px] ${
-                    contextType === 'teams' ? 'text-primary-500' : 'text-emerald-500'
-                  }`}>
+                  <span className={`font-black text-[10px] uppercase tracking-tighter truncate max-w-[120px] ${contextType === 'teams' ? 'text-primary-500' : 'text-emerald-500'
+                    }`}>
                     {comment.user?.name || 'User'}
                   </span>
-                  
+
                   <span className="text-[9px] text-sec font-bold opacity-30 uppercase tracking-tighter shrink-0 whitespace-nowrap flex items-center gap-1">
                     <span className="opacity-50">·</span>
                     {new Date(comment.createdAt).toLocaleDateString()}
@@ -185,7 +180,7 @@ const CommentSection = ({
                     </div>
                   </div>
                 ) : (
-                  <p className={`text-sm leading-relaxed mt-2 ${isNotes ? 'text-main font-medium' : 'text-sec font-medium'}`}>
+                  <p className={`text-sm leading-relaxed mt-2 break-words break-all whitespace-pre-wrap ${isNotes ? 'text-main font-medium' : 'text-sec font-medium'}`}>
                     {comment.text}
                   </p>
                 )}
@@ -220,7 +215,7 @@ const CommentSection = ({
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="relative group">
+      <form onSubmit={handleSubmit} className="relative group mt-2">
         <div className="glass-panel p-2 flex items-end gap-2 border-col/40 group-focus-within:bg-sec/60 transition-all shadow-lg">
           <textarea
             value={text}
@@ -239,8 +234,8 @@ const CommentSection = ({
               type="button"
               onClick={isListening ? stopListening : startListening}
               className={`flex items-center justify-center h-9 w-9 rounded-full transition-all ${isListening
-                  ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/20'
-                  : 'text-sec hover:text-main hover:bg-ter/50'
+                ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/20'
+                : 'text-sec hover:text-main hover:bg-ter/50'
                 }`}
               title={isListening ? "Stop Listening" : "Voice Message"}
             >
@@ -258,7 +253,7 @@ const CommentSection = ({
         </div>
       </form>
       {/* Confirmation Modal */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirmDelete}

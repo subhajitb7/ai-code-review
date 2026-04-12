@@ -149,8 +149,8 @@ const TeamDetail = () => {
             <p className="text-sec text-sm mt-1 font-medium">{team.description || 'No description'}</p>
           </div>
         </div>
-        {canManage && (
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          {myRole && (
             <button 
               onClick={() => setIsChatOpen(true)} 
               className="h-10 w-10 flex items-center justify-center bg-ter border border-col rounded-xl text-sec hover:text-primary-500 hover:border-primary-500/50 transition-all group"
@@ -158,14 +158,19 @@ const TeamDetail = () => {
             >
               <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-all" />
             </button>
-            <button onClick={() => setShowInvite(true)} className="btn-primary flex items-center gap-2 text-sm px-6">
-              <UserPlus className="h-4 w-4" /> Invite
-            </button>
-            <button onClick={openLinkProject} className="btn-secondary flex items-center gap-2 text-sm px-6">
-              <FolderOpen className="h-4 w-4" /> Link Project
-            </button>
-          </div>
-        )}
+          )}
+
+          {canManage && (
+            <>
+              <button onClick={() => setShowInvite(true)} className="btn-primary flex items-center gap-2 text-sm px-6">
+                <UserPlus className="h-4 w-4" /> Invite
+              </button>
+              <button onClick={openLinkProject} className="btn-secondary flex items-center gap-2 text-sm px-6">
+                <FolderOpen className="h-4 w-4" /> Link Project
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Grid Wrapper: Consistent with platform grid */}
