@@ -154,12 +154,14 @@ export const verifyOtp = async (req, res) => {
     await user.save();
 
     generateToken(res, user._id);
-    res.json({
+
+    return res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
       isMaster: user.email === process.env.MASTER_ADMIN_EMAIL,
+      mustUpdatePassword: user.mustUpdatePassword
     });
   } catch (error) {
     console.error(error);
