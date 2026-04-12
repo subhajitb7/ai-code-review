@@ -1,7 +1,9 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const hostname = window.location.hostname;
+axios.defaults.baseURL = isLocal ? `http://${hostname}:5007` : (import.meta.env.VITE_API_URL || "https://api.subhajitbag.in");
 axios.defaults.withCredentials = true;
 
 export const AuthContext = createContext();

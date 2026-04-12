@@ -124,9 +124,11 @@ const AuthPage = () => {
         </div>
 
         <a
-          href={`${window.location.hostname === "localhost"
-              ? "http://localhost:5001"
-              : "https://api.subhajitbag.in"}/api/auth/github`}
+          href={`${(() => {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const SOCKET_URL = isLocal ? 'http://localhost:5007' : 'https://api.subhajitbag.in';
+            return SOCKET_URL;
+          })()}/api/auth/github`}
           className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-col bg-ter hover:bg-sec hover:border-text-main transition-all font-bold text-main group shadow-sm"
         >
           <GithubIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />

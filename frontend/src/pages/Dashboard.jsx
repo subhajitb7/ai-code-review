@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [insights, setInsights] = useState('');
   const [fetchingInsights, setFetchingInsights] = useState(false);
   const [error, setError] = useState(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,12 +37,29 @@ const Dashboard = () => {
       }
     };
     const fetchInsights = async () => {
+      // 1. Check if we already have it in current session cache
+      const cachedInsights = sessionStorage.getItem('ai_insights');
+      if (cachedInsights) {
+        setInsights(cachedInsights);
+        return;
+      }
+
+      // 2. Prevent double-calls in StrictMode (Dev)
+      if (hasFetched.current) return;
+      hasFetched.current = true;
+
       setFetchingInsights(true);
       try {
         const { data } = await axios.get('/api/ai/insights');
-        setInsights(data.insights);
+        setInsights(data.insights || '');
+        // 3. Store in session cache
+        if (data.insights) {
+          sessionStorage.setItem('ai_insights', data.insights);
+        }
       } catch (err) {
         console.error('Failed to fetch insights', err);
+        // Reset ref so we can try again on next mount if it failed
+        hasFetched.current = false;
       } finally {
         setFetchingInsights(false);
       }

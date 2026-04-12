@@ -15,10 +15,11 @@ export const SocketPubSubProvider = ({ children }) => {
   // Initialize Socket
   useEffect(() => {
     if (user && !socket) {
-      const SOCKET_URL =
-        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://127.0.0.1:5007'
-          : 'https://api.subhajitbag.in';
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const hostname = window.location.hostname;
+      const SOCKET_URL = isLocal
+        ? `http://${hostname}:5007`
+        : 'https://api.subhajitbag.in';
       const s = io(SOCKET_URL, {
         withCredentials: true,
         reconnection: true,
