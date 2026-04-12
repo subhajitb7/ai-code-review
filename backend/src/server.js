@@ -29,17 +29,15 @@ const app = express();
 const httpServer = createServer(app);
 
 const allowedOrigins = [
-  'http://localhost:5173', 
-  'http://localhost:5174', 
-  'http://localhost:5175', 
-  'http://localhost:5176',
-  'http://127.0.0.1:5173'
+  'http://localhost:5173',
+  'https://syncodalyze-ai.subhajitbag.in',
+  'https://main.dnropeb1sosnh.amplifyapp.com'
 ];
 
 // Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: (origin, callback) => callback(null, true),
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -87,7 +85,16 @@ io.on('connection', (socket) => {
 });
 
 // Middleware
-app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
