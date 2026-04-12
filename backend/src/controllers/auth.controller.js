@@ -195,7 +195,13 @@ export const resendOtp = async (req, res) => {
 // @desc    Logout user / clear cookie
 // @route   POST /api/auth/logout
 export const logoutUser = (req, res) => {
-  res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+  res.cookie('jwt', '', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    expires: new Date(0),
+  });
+
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
