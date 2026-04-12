@@ -10,7 +10,7 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', language: 'javascript', repoUrl: '' });
-  
+
   // Deletion State
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
@@ -133,13 +133,13 @@ const Projects = () => {
                   <span className="bg-ter/50 px-2 py-0.5 rounded text-[9px] border border-col">v{proj.currentVersion || 1}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-sec font-medium">
-                   <div className="flex items-center gap-1.5">
-                      <div className="h-4 w-4 rounded-full bg-primary-500/10 flex items-center justify-center text-[8px] font-black text-primary-600 border border-primary-500/20">
-                        {proj.owner?.name?.charAt(0).toUpperCase() || '?'}
-                      </div>
-                      <span className="truncate max-w-[150px]">Owner: <span className="text-main font-bold">{proj.owner?.name || 'Unknown'}</span></span>
-                   </div>
-                   <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-4 w-4 rounded-full bg-primary-500/10 flex items-center justify-center text-[8px] font-black text-primary-600 border border-primary-500/20">
+                      {proj.owner?.name?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <span className="truncate max-w-[150px]">Owner: <span className="text-main font-bold">{proj.owner?.name || 'Unknown'}</span></span>
+                  </div>
+                  <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </Link>
@@ -185,7 +185,7 @@ const Projects = () => {
         </div>
       )}
       {/* Confirmation Modal */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirmDelete}

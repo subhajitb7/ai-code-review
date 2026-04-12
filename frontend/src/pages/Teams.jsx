@@ -10,7 +10,7 @@ const Teams = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
-  
+
   // Deletion State
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState(null);
@@ -162,7 +162,7 @@ const Teams = () => {
         </div>
       )}
       {/* Confirmation Modal */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirmDelete}

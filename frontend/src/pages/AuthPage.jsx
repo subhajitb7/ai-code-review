@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock, User } from 'lucide-react'; 
+import { Mail, Lock, User } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
 
 const AuthPage = () => {
@@ -87,13 +87,12 @@ const AuthPage = () => {
                   { label: 'Number', met: /\d/.test(password) },
                   { label: 'Symbol (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
                 ].map((req) => (
-                  <span 
-                    key={req.label} 
-                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${
-                      req.met 
-                        ? 'bg-green-500/10 text-green-400 border-green-500/30' 
+                  <span
+                    key={req.label}
+                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${req.met
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
                         : 'bg-red-500/5 text-red-500/40 border-red-500/10'
-                    }`}
+                      }`}
                   >
                     {req.label}
                   </span>
@@ -110,9 +109,9 @@ const AuthPage = () => {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            disabled={loading || (!isLogin && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(password))} 
+          <button
+            type="submit"
+            disabled={loading || (!isLogin && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(password))}
             className="btn-primary mt-2 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-primary-500/10"
           >
             {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
@@ -124,11 +123,10 @@ const AuthPage = () => {
           <span className="relative px-4 text-xs font-bold text-sec uppercase bg-sec tracking-widest rounded-full border border-col">OR</span>
         </div>
 
-        <a 
-          href={`${
-            window.location.hostname === "localhost" 
-            ? "http://localhost:5001" 
-            : "https://api.subhajitbag.in"}/api/auth/github`}
+        <a
+          href={`${window.location.hostname === "localhost"
+              ? "http://localhost:5001"
+              : "https://api.subhajitbag.in"}/api/auth/github`}
           className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-col bg-ter hover:bg-sec hover:border-text-main transition-all font-bold text-main group shadow-sm"
         >
           <GithubIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />

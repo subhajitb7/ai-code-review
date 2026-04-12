@@ -24,7 +24,7 @@ const TeamDetail = () => {
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
 
   const fetchTeam = async () => {
@@ -151,8 +151,8 @@ const TeamDetail = () => {
         </div>
         <div className="flex items-center gap-3">
           {myRole && (
-            <button 
-              onClick={() => setIsChatOpen(true)} 
+            <button
+              onClick={() => setIsChatOpen(true)}
               className="h-10 w-10 flex items-center justify-center bg-ter border border-col rounded-xl text-sec hover:text-primary-500 hover:border-primary-500/50 transition-all group"
               title="Team Chat"
             >
@@ -247,7 +247,7 @@ const TeamDetail = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {canManage && (
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.preventDefault();
                             handleRemoveProject(p._id);
@@ -270,7 +270,7 @@ const TeamDetail = () => {
         </div>
       </div>
 
-      <TeamChatDrawer 
+      <TeamChatDrawer
         teamId={id}
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
@@ -323,7 +323,7 @@ const TeamDetail = () => {
         </div>
       )}
       {/* Confirmation Modal */}
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmConfig.isOpen}
         onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
         onConfirm={confirmConfig.onConfirm}

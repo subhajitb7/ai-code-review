@@ -173,7 +173,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {user && mobileOpen && (
-          <div className="md:hidden border-t border-col bg-main shadow-2xl backdrop-blur-md">
+          <div className="lg:hidden border-t border-col bg-main shadow-2xl backdrop-blur-md">
             <div className="p-4 border-b border-col flex items-center gap-3">
               <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${isAdmin ? 'bg-yellow-500/15 text-yellow-600' : 'bg-primary-500/15 text-primary-600'}`}>
                 {user.name?.charAt(0).toUpperCase()}

@@ -71,7 +71,7 @@ const ReviewDetail = () => {
             <span className="h-1 w-1 bg-col rounded-full"></span>
             <span className="text-[10px] text-sec font-bold">{new Date(review.createdAt).toLocaleString()}</span>
             {(review.aiTags || []).map((tag, idx) => (
-               <span key={idx} className="text-[10px] bg-emerald-500/5 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-500/10 font-bold uppercase tracking-widest">#{tag}</span>
+              <span key={idx} className="text-[10px] bg-emerald-500/5 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-500/10 font-bold uppercase tracking-widest">#{tag}</span>
             ))}
           </div>
         </div>
@@ -86,21 +86,21 @@ const ReviewDetail = () => {
         <div className="glass-panel overflow-hidden">
           <div className="bg-sec border-b border-col px-4 py-2 text-sm text-sec font-medium">Source Code</div>
           <div className="bg-main h-[500px]">
-             <Editor
-               height="100%"
-               language={review.language}
-               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-               value={review.codeSnippet}
-               options={{
-                 readOnly: true,
-                 minimap: { enabled: false },
-                 fontSize: 14,
-                 fontFamily: "'Fira Code', Consolas, monospace",
-                 wordWrap: "on",
-                 padding: { top: 16, bottom: 16 },
-                 scrollBeyondLastLine: false,
-               }}
-             />
+            <Editor
+              height="100%"
+              language={review.language}
+              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+              value={review.codeSnippet}
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'Fira Code', Consolas, monospace",
+                wordWrap: "on",
+                padding: { top: 16, bottom: 16 },
+                scrollBeyondLastLine: false,
+              }}
+            />
           </div>
         </div>
 
@@ -108,8 +108,8 @@ const ReviewDetail = () => {
         <div className="glass-panel overflow-hidden">
           <div className="bg-sec border-b border-col px-4 py-2 text-sm text-emerald-600 font-bold uppercase tracking-wider flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> AI Feedback</div>
-            <button 
-              onClick={handleGenerateEmail} 
+            <button
+              onClick={handleGenerateEmail}
               disabled={generatingEmail}
               className="group flex items-center gap-1.5 text-[10px] text-sec hover:text-primary-500 transition-all font-black"
             >
@@ -119,10 +119,10 @@ const ReviewDetail = () => {
           </div>
           <div className="p-6 overflow-auto max-h-[500px]">
             <div className="ai-feedback-content">
-              <ReactMarkdown 
+              <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  code({node, inline, className, children, ...props}) {
+                  code({ node, inline, className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || '');
                     return !inline && match ? (
                       <SyntaxHighlighter
@@ -153,29 +153,29 @@ const ReviewDetail = () => {
       {/* Email Generator Modal */}
       {emailContent && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-           <div className="glass-panel w-full max-w-2xl p-8 relative shadow-2xl border-white/5">
-              <button onClick={() => setEmailContent('')} className="absolute top-6 right-6 p-2 bg-sec rounded-xl text-sec hover:text-rose-500 transition-all text-xl">&times;</button>
-              <h2 className="text-2xl font-bold text-main mb-6 flex items-center gap-3"><Mail className="h-6 w-6 text-primary-500" /> AI Email Draft</h2>
-              <div className="bg-ter/50 p-6 rounded-2xl border border-col whitespace-pre-wrap text-sm text-sec font-medium leading-relaxed max-h-96 overflow-y-auto italic">
-                {emailContent}
-              </div>
-              <div className="mt-6 flex justify-end">
-                 <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(emailContent);
-                    alert('Email body copied to clipboard!');
-                  }}
-                  className="btn-primary flex items-center gap-2 px-6"
-                 >
-                    <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
-                      <FileCode className="h-5 w-5" />
-                    </div>
-                    <div>
-                    Copy to Clipboard
-                    </div>
-                 </button>
-              </div>
-           </div>
+          <div className="glass-panel w-full max-w-2xl p-8 relative shadow-2xl border-white/5">
+            <button onClick={() => setEmailContent('')} className="absolute top-6 right-6 p-2 bg-sec rounded-xl text-sec hover:text-rose-500 transition-all text-xl">&times;</button>
+            <h2 className="text-2xl font-bold text-main mb-6 flex items-center gap-3"><Mail className="h-6 w-6 text-primary-500" /> AI Email Draft</h2>
+            <div className="bg-ter/50 p-6 rounded-2xl border border-col whitespace-pre-wrap text-sm text-sec font-medium leading-relaxed max-h-96 overflow-y-auto italic">
+              {emailContent}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(emailContent);
+                  alert('Email body copied to clipboard!');
+                }}
+                className="btn-primary flex items-center gap-2 px-6"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+                  <FileCode className="h-5 w-5" />
+                </div>
+                <div>
+                  Copy to Clipboard
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

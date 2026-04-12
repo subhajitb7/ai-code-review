@@ -27,7 +27,7 @@ import Footer from './components/Footer';
 
 import axios from 'axios';
 // Connectivity standardization: Using the current origin allows the Vite proxy to handle routing.
-const API_URL = ''; 
+const API_URL = '';
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 

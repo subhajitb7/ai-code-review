@@ -55,7 +55,7 @@ const Dashboard = () => {
   const filteredReviews = reviews.filter((r) => {
     // Exclude project-linked reviews from Dashboard "Code Insights"
     if (r.fileId) return false;
-    
+
     if (filter === 'bugs') return r.bugsFound > 0;
     if (filter === 'clean') return r.bugsFound === 0;
     return true;
@@ -76,7 +76,7 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold ">Dashboard</h1>
           <p className="text-sec mt-1">Record and analyze your code reviews.</p>
@@ -129,9 +129,9 @@ const Dashboard = () => {
       <div className="glass-panel p-6 sm:p-8 mb-10 border-primary-500/20 bg-gradient-to-br from-primary-500/[0.08] via-transparent to-transparent relative overflow-hidden group shadow-2xl shadow-primary-500/5 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-100">
         <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity duration-700" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
         <div className="absolute -top-12 -right-12 opacity-5 blur-2xl group-hover:scale-110 transition-transform duration-1000">
-           <Sparkles className="h-64 w-64 text-primary-500" />
+          <Sparkles className="h-64 w-64 text-primary-500" />
         </div>
-        
+
         <div className="relative z-10 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
           {/* AI Info */}
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center flex-1 text-center md:text-left min-w-0">
@@ -146,7 +146,7 @@ const Dashboard = () => {
                 <h2 className="text-xl font-black text-main tracking-tighter uppercase whitespace-nowrap">AI Intelligence Summary</h2>
                 <div className="h-px bg-col/50 flex-1 hidden md:block"></div>
               </div>
-              
+
               {fetchingInsights ? (
                 <div className="flex items-center gap-4 text-primary-500 text-sm mt-3 font-black animate-pulse">
                   <div className="flex gap-1.5">
@@ -178,36 +178,36 @@ const Dashboard = () => {
 
           {/* Metric Section */}
           <div className="lg:border-l border-col/30 lg:pl-12 flex flex-col items-center gap-5 shrink-0">
-             <div className="relative h-28 w-28 flex items-center justify-center group/metric">
-                <div className="absolute inset-0 bg-primary-500/10 rounded-full blur-2xl opacity-0 group-hover/metric:opacity-100 transition-opacity duration-500"></div>
-                <svg className="h-full w-full rotate-[-90deg] relative z-10">
-                  <circle
-                    cx="56" cy="56" r="48"
-                    className="stroke-ter/50 fill-none stroke-[6]"
-                  />
-                  <circle
-                    cx="56" cy="56" r="48"
-                    className="stroke-primary-500 fill-none stroke-[6] transition-all duration-1000 ease-out"
-                    strokeDasharray="301.59"
-                    strokeDashoffset={301.59 - (301.59 * stats.cleanPercent) / 100}
-                    strokeLinecap="round"
-                    style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.4))' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                   <span className="text-3xl font-black text-main tracking-tighter">{stats.cleanPercent}%</span>
-                   <span className="text-[7px] font-black text-primary-500 uppercase tracking-[0.3em] mt-0.5">Stability</span>
-                </div>
-             </div>
-             
-             <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/5 border border-primary-500/10 rounded-full mb-2">
-                   <span className="text-[8px] font-black text-sec uppercase tracking-[0.2em]">Growth Metric</span>
-                </div>
-                <p className="text-[9px] text-sec max-w-[160px] font-bold leading-tight uppercase opacity-60">
-                   Syncing with <span className="text-main font-black underline decoration-primary-500/30 decoration-2">{stats.totalReviews} analyzes</span>
-                </p>
-             </div>
+            <div className="relative h-28 w-28 flex items-center justify-center group/metric">
+              <div className="absolute inset-0 bg-primary-500/10 rounded-full blur-2xl opacity-0 group-hover/metric:opacity-100 transition-opacity duration-500"></div>
+              <svg className="h-full w-full rotate-[-90deg] relative z-10">
+                <circle
+                  cx="56" cy="56" r="48"
+                  className="stroke-ter/50 fill-none stroke-[6]"
+                />
+                <circle
+                  cx="56" cy="56" r="48"
+                  className="stroke-primary-500 fill-none stroke-[6] transition-all duration-1000 ease-out"
+                  strokeDasharray="301.59"
+                  strokeDashoffset={301.59 - (301.59 * stats.cleanPercent) / 100}
+                  strokeLinecap="round"
+                  style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.4))' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+                <span className="text-3xl font-black text-main tracking-tighter">{stats.cleanPercent}%</span>
+                <span className="text-[7px] font-black text-primary-500 uppercase tracking-[0.3em] mt-0.5">Stability</span>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/5 border border-primary-500/10 rounded-full mb-2">
+                <span className="text-[8px] font-black text-sec uppercase tracking-[0.2em]">Growth Metric</span>
+              </div>
+              <p className="text-[9px] text-sec max-w-[160px] font-bold leading-tight uppercase opacity-60">
+                Syncing with <span className="text-main font-black underline decoration-primary-500/30 decoration-2">{stats.totalReviews} analyzes</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

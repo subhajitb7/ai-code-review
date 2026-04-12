@@ -21,18 +21,18 @@ const LandingPage = () => {
           <Sparkles className="h-4 w-4 text-primary-500" />
           <span className="text-sm text-sec font-bold">Powered by advanced AI models</span>
         </div>
-        
+
         <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 leading-tight text-main">
           Code reviews, <br />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600">
             supercharged by AI
           </span>
         </h1>
-        
+
         <p className="text-xl text-sec mb-10 max-w-2xl mx-auto font-medium">
           Automate your code review process. Detect vulnerabilities, squash bugs, and receive intelligent suggestions in real-time.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/auth" className="btn-primary text-lg px-8 py-4 flex items-center gap-2 group">
             Start Reviewing Now
