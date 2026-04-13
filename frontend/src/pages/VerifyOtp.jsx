@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, ShieldCheck, Zap, Lock, Mail } from 'lucide-react';
 
 const VerifyOtp = () => {
   const { setUser } = useContext(AuthContext);
@@ -15,6 +16,7 @@ const VerifyOtp = () => {
 
   const email = location.state?.email;
   const type = location.state?.type; // '2fa' or undefined (registration)
+  const shouldRemember = location.state?.shouldRemember;
 
   useEffect(() => {
     if (!email) {
@@ -35,7 +37,6 @@ const VerifyOtp = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       const next = document.getElementById(`otp-${index + 1}`);
       if (next) next.focus();
@@ -61,17 +62,16 @@ const VerifyOtp = () => {
     setError(null);
     try {
       const endpoint = type === '2fa' ? '/api/auth/verify-2fa' : '/api/auth/verify-otp';
-      const { data } = await axios.post(endpoint, { email, otp: otpString });
+      const { data } = await axios.post(endpoint, { email, otp: otpString, shouldRemember });
       localStorage.setItem('userInfo', JSON.stringify(data));
       
       if (data.mustUpdatePassword) {
-        navigate('/security-update');
+        navigate('/reset-password', { state: { email, token: data.resetToken } });
       } else {
         setUser(data);
-        // Handshake Delay: Increased to allow background pulse to resolve/shield
         setTimeout(() => {
           navigate('/dashboard');
-        }, 1000);
+        }, 800);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
@@ -91,58 +91,125 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-6 relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="glass-panel w-full max-w-md p-8 z-10">
-        <h2 className="text-3xl font-bold text-center mb-2">
-          {type === '2fa' ? 'Second Factor Auth' : 'Verify Your Email'}
-        </h2>
-        <p className="text-gray-400 text-center mb-8">
-          {type === '2fa' 
-            ? 'Enter the security code to access your account' 
-            : `We sent a 6-digit code to ${email}`}
-        </p>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm">{error}</div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex justify-center gap-3">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                id={`otp-${index}`}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value.replace(/\D/g, ''))}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-14 text-center text-2xl font-bold glass-input focus:border-primary-500"
-              />
-            ))}
-          </div>
-
-          <button type="submit" disabled={loading} className="btn-primary disabled:opacity-50">
-            {loading ? 'Verifying...' : 'Verify & Continue'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-400 mb-2">Didn't receive the code?</p>
-          {resendCooldown > 0 ? (
-            <p className="text-sm text-gray-500">Resend in {resendCooldown}s</p>
-          ) : (
-            <button onClick={handleResend} className="text-sm text-primary-400 hover:text-primary-300 font-medium flex items-center gap-1 mx-auto">
-              <RefreshCw className="h-3 w-3" /> Resend OTP
-            </button>
-          )}
+    <div className="flex-1 min-h-[calc(100vh-64px)] flex bg-main overflow-hidden relative">
+      <div className="absolute inset-0 grid-background opacity-20 pointer-events-none"></div>
+      
+      {/* Left Column: Verification Sidecar */}
+      <div className="hidden lg:flex flex-1 relative flex-col items-center justify-center p-20 bg-ter/10 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+           <motion.div 
+             animate={{ scale: [1, 1.15, 1], rotate: [0, 10, 0] }}
+             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-600/5 rounded-full blur-[150px]"
+           />
         </div>
 
-        <button onClick={() => navigate('/auth')} className="mt-4 text-sm text-gray-500 hover:text-gray-300 flex items-center gap-1 mx-auto">
-          <ArrowLeft className="h-3 w-3" /> Back to Login
-        </button>
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="relative z-10 text-center"
+        >
+          <div className="mb-12 inline-block">
+             <div className="h-24 w-24 bg-primary-500 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.2)] border border-primary-400/30 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                <Lock className="h-10 w-10 text-white relative z-10" />
+             </div>
+          </div>
+          
+          <h2 className="text-4xl xl:text-5xl font-black text-main tracking-tighter mb-6 leading-tight">
+            Clearance <br />
+            <span className="text-primary-500">Verification</span>
+          </h2>
+          
+          <div className="flex flex-col gap-4 max-w-sm mx-auto">
+             <div className="flex items-start gap-4 p-4 bg-ter/30 border border-col rounded-2xl backdrop-blur-sm">
+                <Zap className="h-5 w-5 text-amber-500 mt-1" />
+                <div className="text-left">
+                   <p className="text-[10px] font-black text-sec uppercase tracking-widest mb-1">Session Handshake</p>
+                   <p className="text-xs text-sec font-medium">Verify your session via the one-time hash sent to your secure network endpoint.</p>
+                </div>
+             </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right Column: OTP Terminal */}
+      <div className="w-full lg:w-[500px] xl:w-[600px] relative flex flex-col items-center justify-center p-8 sm:p-12 xl:p-20 z-10">
+        <div className="w-full max-w-md">
+           <motion.div
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="w-full"
+           >
+              <div className="mb-10 lg:hidden text-center">
+                 <div className="h-12 w-12 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg border border-primary-400/20 mx-auto">
+                    <Lock className="h-6 w-6 text-white" />
+                 </div>
+              </div>
+
+              <div className="mb-10 text-center lg:text-left">
+                <h3 className="text-3xl font-black text-main tracking-tighter mb-2">
+                   {type === '2fa' ? 'Second Factor Clearance' : 'Identify Verification'}
+                </h3>
+                <p className="text-sm text-sec font-medium leading-relaxed">
+                   Enter the 6-digit hash dispatched to <br />
+                   <span className="text-primary-500 font-bold">{email}</span>.
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl mb-8 text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-rose-500"></div>
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+                <div className="flex justify-between gap-3 px-2">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index} id={`otp-${index}`} type="text" inputMode="numeric" maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleChange(index, e.target.value.replace(/\D/g, ''))}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className="w-full h-16 sm:h-20 text-center text-3xl font-black rounded-2xl glass-input focus:border-primary-500 transition-all border-2 border-col !bg-ter/20"
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-4">
+                  <button
+                    type="submit" disabled={loading}
+                    className="w-full btn-primary h-14 disabled:opacity-30 disabled:grayscale transition-all shadow-[0_10px_30px_rgba(59,130,246,0.15)] flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest"
+                  >
+                    {loading ? 'Verifying Integrity...' : 'Verify Clearance'}
+                  </button>
+
+                  <div className="text-center pt-4">
+                    <p className="text-[10px] font-black text-sec uppercase tracking-[0.2em] mb-4 opacity-40">Didn't receive the hash?</p>
+                    {resendCooldown > 0 ? (
+                      <span className="text-[10px] font-black text-primary-500/40 uppercase tracking-widest bg-primary-500/5 px-6 py-2 rounded-full border border-primary-500/10">
+                        Resend available in {resendCooldown}s
+                      </span>
+                    ) : (
+                      <button 
+                        type="button" onClick={handleResend}
+                        className="text-[10px] font-black text-primary-500 uppercase tracking-widest hover:text-white hover:bg-primary-500 px-6 py-3 rounded-full border border-primary-500/30 transition-all flex items-center gap-2 mx-auto"
+                      >
+                        <RefreshCw className="h-3 w-3" /> Dispatch New Hash
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </form>
+
+              <div className="mt-12 text-center">
+                <button onClick={() => navigate('/auth')} className="text-[10px] font-black text-sec uppercase tracking-widest hover:text-white transition-all flex items-center gap-2 mx-auto">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Return to Clearance Console
+                </button>
+              </div>
+           </motion.div>
+        </div>
       </div>
     </div>
   );

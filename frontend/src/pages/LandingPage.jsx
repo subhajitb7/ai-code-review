@@ -14,7 +14,8 @@ import {
   Layers, 
   MessageSquare,
   GitBranch,
-  CheckCircle2
+  CheckCircle2,
+  Search
 } from 'lucide-react';
 
 const LandingPage = () => {
@@ -115,12 +116,10 @@ const LandingPage = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24">
-          <Link to="/auth" className="btn-primary text-base px-10 py-5 flex items-center gap-3 group relative overflow-hidden shadow-2xl shadow-primary-500/20">
-            <span className="relative z-10">Launch Your First Review</span>
-            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform relative z-10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Link to="/auth" className="h-14 px-10 rounded-xl bg-primary-600 hover:bg-primary-500 text-white flex items-center gap-3 group transition-all font-black tracking-widest text-[11px] uppercase shadow-[0_15px_40px_rgba(37,99,235,0.3)]">
+            Launch Your First Review <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <a href="#features" className="btn-secondary text-base px-10 py-5 border-col hover:border-primary-500/30 transition-all font-bold">
+          <a href="#features" className="h-14 px-10 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all font-black tracking-widest text-[11px] uppercase text-white/60 hover:text-white flex items-center justify-center">
             Explore Capabilities
           </a>
         </div>
@@ -139,9 +138,130 @@ const LandingPage = () => {
              GITHUB
            </div>
            <div className="flex items-center gap-2 font-black text-xl"><Terminal className="h-6 w-6" /> LINUX</div>
-           <div className="flex items-center gap-2 font-black text-xl"><Code2 className="h-6 w-6" /> Vercel</div>
+           <div className="flex items-center gap-2 font-black text-xl"><Code2 className="h-6 w-6" /> VERCEL</div>
            <div className="flex items-center gap-2 font-black text-xl"><Globe className="h-6 w-6" /> AWS</div>
         </div>
+      </motion.div>
+
+      {/* Target Analysis Terminal (Transition Asset) */}
+      <motion.div 
+        initial={{ y: 40, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+        className="w-full max-w-5xl px-6 relative mb-48 group z-10"
+      >
+         <div className="absolute -inset-20 bg-primary-600/5 blur-[120px] rounded-full pointer-events-none group-hover:bg-primary-600/10 transition-colors"></div>
+         <div className="glass-panel p-2 border-col/60 shadow-2xl relative overflow-hidden">
+            <div className="bg-main/80 backdrop-blur-3xl rounded-xl border border-col p-8 sm:p-12 pb-16 text-left relative overflow-hidden">
+               {/* Header Badges */}
+               <div className="flex justify-between items-center mb-12 border-b border-col pb-8">
+                  <div className="flex items-center gap-4">
+                     <div className="h-10 w-10 bg-ter/80 rounded-lg flex items-center justify-center border border-col text-primary-500 shadow-inner">
+                        <Terminal className="h-5 w-5" />
+                     </div>
+                     <div>
+                        <p className="text-[10px] font-black text-sec uppercase tracking-[0.3em] mb-1 opacity-50">Target Analysis</p>
+                        <p className="text-xs font-bold text-main tracking-tight">Logic_Validator_v4.py</p>
+                     </div>
+                  </div>
+                  <div className="flex gap-4">
+                     <div className="px-4 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest shadow-sm">Integrity: 100%</div>
+                     <div className="px-4 py-1.5 rounded bg-primary-500/10 border border-primary-500/20 text-primary-500 text-[9px] font-black uppercase tracking-widest shadow-sm">Nodes Active</div>
+                  </div>
+               </div>
+
+               {/* Terminal Content */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 font-mono text-sm leading-relaxed relative">
+                  {/* Code Panel (Static & Professional) */}
+                  <div className="space-y-4 relative z-10">
+                     {[
+                       { line: "01", type: "comment", content: "# Initialize Structural Audit" },
+                       { line: "02", type: "keyword", content: "async function", main: "AuditNode", other: "(cluster) {" },
+                       { line: "03", type: "indent", content: "const", main: "result", other: "= await scan(cluster);" },
+                       { line: "04", type: "indent", content: "if", main: "(result.vulnerabilities)", other: "{" },
+                       { line: "05", type: "indent2", content: "triggerIsolation(cluster);" },
+                       { line: "06", type: "indent", content: "}" },
+                       { line: "07", type: "base", content: "}" }
+                     ].map((l, i) => (
+                       <div key={i} className="flex gap-6 relative group/line">
+                          <span className="opacity-20 text-[10px] w-4">{l.line}</span>
+                          <div>
+                             {l.type === "comment" && <span className="text-primary-500 italic">{l.content}</span>}
+                             {l.type === "keyword" && <><span className="text-emerald-500">{l.content}</span> <span className="text-main">{l.main}</span> <span className="opacity-40">{l.other}</span></>}
+                             {l.type === "indent" && <>&nbsp;&nbsp;<span className="text-amber-500">{l.content}</span> <span className="text-main">{l.main}</span> <span className="opacity-40">{l.other}</span></>}
+                             {l.type === "indent2" && <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-main">{l.content}</span></>}
+                             {l.type === "base" && <span className="opacity-40">{l.content}</span>}
+                          </div>
+                       </div>
+                     ))}
+                  </div>
+
+                  <div className="relative pb-6">
+                     <div className="absolute -left-6 top-0 bottom-0 w-px bg-col/30"></div>
+                     <div className="space-y-6">
+                        {/* AI Visual Processor Box */}
+                        <div className="p-1 whitespace-nowrap bg-black border border-col rounded-2xl relative overflow-hidden shadow-2xl min-h-[200px]">
+                            {/* Internal Code Scanning Animation (Seamless Infinite Marquee) */}
+                            <div className="absolute inset-0 font-mono text-[8px] p-6 leading-[1.4] z-0 pt-14 flex flex-col">
+                               <motion.div 
+                                 animate={{ y: ["0%", "-50%"] }}
+                                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                                 className="text-emerald-500/80"
+                               >
+                                  {/* Render two sets of lines for infinite loop */}
+                                  {[...Array(60)].map((_, i) => (
+                                    <div key={i} className="flex gap-4">
+                                       <span className="opacity-20">{`0x${(i*16).toString(16).toUpperCase()}`}</span>
+                                       <span className={i % 5 === 0 ? "text-primary-400 font-bold" : "text-emerald-400"}>
+                                          {i % 5 === 0 ? `>> VULNERABILITY_DETECTED_0x${(i*4).toString(16).toUpperCase()}` : 
+                                           i % 7 === 0 ? `>> LOGIC_OPTIMIZED_SUCCESS` : 
+                                           `>> SCANNING_WORKSPACE_BLOCK_${i}`}
+                                       </span>
+                                    </div>
+                                  ))}
+                                  {/* Identical second set for seamless wrap-around */}
+                                  {[...Array(60)].map((_, i) => (
+                                    <div key={`dup-${i}`} className="flex gap-4 border-t border-transparent">
+                                       <span className="opacity-20">{`0x${(i*16).toString(16).toUpperCase()}`}</span>
+                                       <span className={i % 5 === 0 ? "text-primary-400 font-bold" : "text-emerald-400"}>
+                                          {i % 5 === 0 ? `>> VULNERABILITY_DETECTED_0x${(i*4).toString(16).toUpperCase()}` : 
+                                           i % 7 === 0 ? `>> LOGIC_OPTIMIZED_SUCCESS` : 
+                                           `>> SCANNING_WORKSPACE_BLOCK_${i}`}
+                                       </span>
+                                    </div>
+                                  ))}
+                               </motion.div>
+                            </div>
+
+                            {/* Internal Laser Line (Intense High Visibility) */}
+                            <motion.div 
+                              animate={{ top: ["-5%", "105%"] }}
+                              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                              className="absolute left-0 w-full h-[2px] bg-emerald-400 z-10 shadow-[0_0_15px_rgba(52,211,153,0.8)]"
+                            />
+
+                           {/* Fixed Header Overlay */}
+                           <div className="absolute top-0 left-0 right-0 z-20 px-6 py-3.5 bg-black border-b border-col pointer-events-none">
+                              <div className="flex items-center gap-3">
+                                 <motion.div 
+                                   animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
+                                   transition={{ duration: 0.8, repeat: Infinity }}
+                                   className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"
+                                 />
+                                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Active Logical Sweep</span>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-sec opacity-30 animate-pulse mt-8">
+                           <Zap className="h-3 w-3" /> System heartbeat: 4ms latency peak
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
       </motion.div>
 
       {/* Feature Grid */}
@@ -221,7 +341,7 @@ const LandingPage = () => {
                        <div className="flex gap-4"><span className="opacity-30">6</span> &#125;;</div>
                     </div>
                     <div className="absolute -bottom-6 -right-6 glass-panel p-4 animate-bounce duration-[3s]">
-                       <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase tracking-widest">
+                       <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase tracking_widest">
                           <CheckCircle2 className="h-4 w-4" /> Logic Audited
                        </div>
                     </div>

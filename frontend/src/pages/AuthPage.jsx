@@ -1,7 +1,8 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, User, Layout, ArrowRight, ShieldCheck, Zap, Cpu } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
 
 const AuthPage = () => {
@@ -11,6 +12,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [shouldRemember, setShouldRemember] = useState(true);
 
   const { login, register, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -26,9 +28,9 @@ const AuthPage = () => {
 
     let result;
     if (isLogin) {
-      result = await login(email, password);
+      result = await login(email, password, shouldRemember);
     } else {
-      result = await register(name, email, password);
+      result = await register(name, email, password, shouldRemember);
     }
 
     setLoading(false);
@@ -36,111 +38,222 @@ const AuthPage = () => {
     if (result.success) {
       navigate('/dashboard');
     } else if (result.needsVerification) {
-      navigate('/verify-otp', { state: { email: result.email || email } });
+      navigate('/verify-otp', { state: { email: result.email || email, shouldRemember } });
     } else if (result.requires2fa) {
-      navigate('/verify-otp', { state: { email: result.email || email, type: '2fa' } });
+      navigate('/verify-otp', { state: { email: result.email || email, type: '2fa', shouldRemember } });
     } else {
       setError(result.message);
     }
   };
 
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.5 } },
+    exit: { opacity: 0, transition: { duration: 0.3 } }
+  };
+
   return (
-    <div className="flex-1 flex items-center justify-center p-6 relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-      <div className="glass-panel w-full max-w-md p-8 z-10 mt-10 shadow-2xl">
-        <h2 className="text-3xl font-bold text-center mb-2 text-main">
-          {isLogin ? 'Welcome Back' : 'Create an Account'}
-        </h2>
-        <p className="text-sec font-medium text-center mb-8">
-          {isLogin ? 'Sign in to continue to Syncodalyze AI' : 'Get started with Syncodalyze AI today'}
-        </p>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {!isLogin && (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold text-sec">Full Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required={!isLogin} className="glass-input" placeholder="John Doe" />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-bold text-sec">Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="glass-input" placeholder="name@example.com" />
-          </div>
-
-          <div className="flex flex-col gap-2 relative">
-            <label className="text-sm font-bold text-sec">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="glass-input" placeholder="••••••••" />
-            {!isLogin && password && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  { label: '6-8 Chars', met: password.length >= 6 && password.length <= 8 },
-                  { label: 'Uppercase', met: /[A-Z]/.test(password) },
-                  { label: 'Lowercase', met: /[a-z]/.test(password) },
-                  { label: 'Number', met: /\d/.test(password) },
-                  { label: 'Symbol (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
-                ].map((req) => (
-                  <span
-                    key={req.label}
-                    className={`text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded border transition-colors ${req.met
-                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
-                        : 'bg-red-500/5 text-red-500/40 border-red-500/10'
-                      }`}
-                  >
-                    {req.label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {isLogin && (
-            <div className="text-right -mt-2">
-              <Link to="/forgot-password" className="text-sm text-primary-400 hover:text-primary-300 transition-colors">
-                Forgot Password?
-              </Link>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || (!isLogin && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(password))}
-            className="btn-primary mt-2 disabled:opacity-50 disabled:grayscale transition-all shadow-lg shadow-primary-500/10"
-          >
-            {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Sign Up'}
-          </button>
-        </form>
-
-        <div className="relative my-8 text-center">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-col"></div></div>
-          <span className="relative px-4 text-xs font-bold text-sec uppercase bg-sec tracking-widest rounded-full border border-col">OR</span>
+    <div className="flex-1 min-h-[calc(100vh-64px)] flex bg-main overflow-hidden relative">
+      {/* Background Decor - Grid Lines */}
+      <div className="absolute inset-0 grid-background opacity-20 pointer-events-none"></div>
+      
+      {/* Left: Brand Column (Hidden on mobile) */}
+      <div className="hidden lg:flex flex-1 relative flex-col items-center justify-center p-20 bg-ter/10 overflow-hidden">
+        {/* Animated Sovereign Node Effect */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+           <motion.div 
+             animate={{ 
+               scale: [1, 1.1, 1],
+               rotate: [0, 5, 0]
+             }}
+             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-600/5 rounded-full blur-[150px]"
+           />
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1px] bg-gradient-to-r from-transparent via-primary-500/10 to-transparent rotate-45"></div>
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1px] bg-gradient-to-r from-transparent via-primary-500/10 to-transparent -rotate-45"></div>
         </div>
 
-        <a
-          href={`${(() => {
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const SOCKET_URL = isLocal ? 'http://localhost:5007' : 'https://api.subhajitbag.in';
-            return SOCKET_URL;
-          })()}/api/auth/github`}
-          className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-col bg-ter hover:bg-sec hover:border-text-main transition-all font-bold text-main group shadow-sm"
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 text-center"
         >
-          <GithubIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-          <span>Continue with GitHub</span>
-        </a>
+          <div className="mb-12 inline-block">
+             <div className="h-24 w-24 bg-primary-500 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.2)] border border-primary-400/30">
+                <img src="/logo.svg" alt="Syncodalyze Logo" className="h-16 w-16" />
+             </div>
+          </div>
+          
+          <h2 className="text-4xl xl:text-5xl font-black text-main tracking-tighter mb-6 leading-tight">
+            Advanced Audit <br />
+            <span className="text-primary-500">Intake Terminal</span>
+          </h2>
+          
+          <div className="flex flex-col gap-4 max-w-sm mx-auto">
+             <div className="flex items-start gap-4 p-4 bg-ter/30 border border-col rounded-2xl backdrop-blur-sm">
+                <ShieldCheck className="h-5 w-5 text-emerald-500 mt-1" />
+                <div className="text-left">
+                   <p className="text-[10px] font-black text-sec uppercase tracking-widest mb-1">Integrity Cluster</p>
+                   <p className="text-xs text-sec font-medium">Verify your Node ID to access secure communication channels.</p>
+                </div>
+             </div>
+             <div className="flex items-start gap-4 p-4 bg-ter/30 border border-col rounded-2xl backdrop-blur-sm">
+                <Zap className="h-5 w-5 text-amber-500 mt-1" />
+                <div className="text-left">
+                   <p className="text-[10px] font-black text-sec uppercase tracking-widest mb-1">Instant Sync</p>
+                   <p className="text-xs text-sec font-medium">Connect your GitLab/GitHub account for automated asset indexing.</p>
+                </div>
+             </div>
+          </div>
+        </motion.div>
+        
+        {/* Footer info for Left side */}
+        <div className="absolute bottom-10 left-10 flex flex-col gap-1">
+           <p className="text-[10px] font-black text-sec uppercase tracking-[0.4em]">Unit: Syncodalyze_INTERNAL</p>
+           <p className="text-[8px] font-bold text-sec opacity-40 uppercase tracking-[0.2em]">Build Revision: 4.8.2.SYNC</p>
+        </div>
+      </div>
 
-        <div className="mt-6 text-center text-sm text-sec font-medium">
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}
-          <button type="button" onClick={() => { setIsLogin(!isLogin); setError(null); }}
-            className="ml-2 text-primary-600 hover:text-primary-700 transition-colors font-bold border-b border-transparent hover:border-primary-700">
-            {isLogin ? 'Sign Up' : 'Sign In'}
-          </button>
+      {/* Right: Intake Form Column */}
+      <div className="w-full lg:w-[500px] xl:w-[600px] relative flex flex-col items-center justify-center p-8 sm:p-12 xl:p-20 z-10">
+        <div className="w-full max-w-md">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isLogin ? 'login' : 'register'}
+              variants={containerVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full"
+            >
+              <div className="mb-10 lg:hidden">
+                 <div className="h-12 w-12 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg border border-primary-400/20 mx-auto">
+                    <img src="/logo.svg" alt="S" className="h-8 w-8" />
+                 </div>
+              </div>
+
+              <div className="mb-8">
+                <h3 className="text-3xl font-black text-main tracking-tighter mb-2">
+                  {isLogin ? 'Initialize Session' : 'Recruit Operator'}
+                </h3>
+                <p className="text-sm text-sec font-medium leading-relaxed">
+                  {isLogin ? 'Enter your clearance for ' : 'Prepare for deployment within '} 
+                  <span className="text-primary-500 font-bold">Syncodalyze AI</span>.
+                </p>
+              </div>
+
+              {error && (
+                <motion.div 
+                  initial={{ x: -10, opacity: 0 }} 
+                  animate={{ x: 0, opacity: 1 }}
+                  className="bg-rose-500/10 border border-rose-500/20 text-rose-500 p-4 rounded-xl mb-6 text-[10px] font-black uppercase tracking-widest flex items-center gap-3"
+                >
+                  <div className="h-1.5 w-1.5 rounded-full bg-rose-500"></div>
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {!isLogin && (
+                  <div className="group flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-sec uppercase tracking-widest px-1 group-focus-within:text-primary-500 transition-colors">Tactical Name</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-sec/40 group-focus-within:text-primary-500 transition-colors" />
+                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} required={!isLogin} className="glass-input !pl-14 h-14 w-full" placeholder="e.g. Operator Alpha" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="group flex flex-col gap-2">
+                  <label className="text-[10px] font-black text-sec uppercase tracking-widest px-1 group-focus-within:text-primary-500 transition-colors">Network Identifier</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-sec/40 group-focus-within:text-primary-500 transition-colors" />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="glass-input !pl-14 h-14 w-full" placeholder="identity@sync.io" />
+                  </div>
+                </div>
+
+                <div className="group flex flex-col gap-2 relative">
+                  <label className="text-[10px] font-black text-sec uppercase tracking-widest px-1 group-focus-within:text-primary-500 transition-colors">Verification Hash</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-sec/40 group-focus-within:text-primary-500 transition-colors" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="glass-input !pl-14 h-14 w-full" placeholder="••••••••" />
+                  </div>
+                  
+                  {!isLogin && password && (
+                    <div className="mt-3 flex flex-wrap gap-2 px-1">
+                      {[
+                        { label: 'Length: 6-8', met: password.length >= 6 && password.length <= 8 },
+                        { label: 'Entropy: [A-Z]', met: /[A-Z]/.test(password) },
+                        { label: 'Symbol: @$!', met: /[@$!%*?&]/.test(password) },
+                        { label: 'Numeric', met: /\d/.test(password) },
+                      ].map((req) => (
+                        <span key={req.label} className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${req.met ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-rose-500/5 text-rose-500/30 border-rose-500/10'}`}>
+                          {req.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {isLogin && (
+                  <div className="flex justify-between items-center px-1 -mt-1">
+                    <label className="flex items-center gap-2 cursor-pointer grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all">
+                       <input type="checkbox" className="h-3 w-3 rounded border-col bg-ter accent-primary-500" />
+                       <span className="text-[9px] font-black text-sec uppercase tracking-widest">Stay Logged In</span>
+                    </label>
+                    <Link to="/forgot-password" className="text-[9px] font-black text-primary-500 uppercase tracking-widest hover:text-primary-400 transition-colors">
+                      Forgot Password?
+                    </Link>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || (!isLogin && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,8}$/.test(password))}
+                  className="btn-primary h-14 mt-4 disabled:opacity-30 disabled:grayscale transition-all shadow-[0_10px_30px_rgba(59,130,246,0.15)] flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest"
+                >
+                  {loading ? 'Processing Clearances...' : (
+                    <>
+                      <span>{isLogin ? 'Establish Session' : 'Register Operator'}</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="relative my-10 text-center">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-col"></div></div>
+                <span className="relative px-6 text-[9px] font-black text-sec uppercase bg-main tracking-[0.4em]">Fast Track Integration</span>
+              </div>
+
+              <a
+                href={`${(() => {
+                  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                  const SOCKET_URL = isLocal ? 'http://localhost:5007' : 'https://api.subhajitbag.in';
+                  return SOCKET_URL;
+                })()}/api/auth/github`}
+                className="w-full flex items-center justify-center gap-3 h-14 rounded-2xl border border-col bg-ter hover:bg-sec hover:border-primary-500 transition-all font-black text-[10px] uppercase tracking-widest group shadow-sm overflow-hidden relative"
+              >
+                <div className="absolute inset-y-0 left-0 w-1 bg-primary-500 -translate-x-full group-hover:translate-x-0 transition-transform"></div>
+                <GithubIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                <span>Continue with GitHub Authority</span>
+              </a>
+
+              <div className="mt-10 text-center">
+                 <p className="text-[10px] text-sec font-bold uppercase tracking-widest mb-4 opacity-50">
+                    {isLogin ? "New to the Operational Grid?" : 'Already have an Operational Profile?'}
+                 </p>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsLogin(!isLogin); setError(null); }}
+                  className="w-full py-4 rounded-xl border border-dotted border-col text-primary-500 hover:border-primary-500 hover:bg-primary-500/5 transition-all font-black text-[11px] uppercase tracking-widest"
+                >
+                  {isLogin ? 'Initiate Node Creation' : 'Acknowledge Clearance'}
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

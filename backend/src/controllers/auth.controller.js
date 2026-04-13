@@ -157,7 +157,8 @@ export const verifyOtp = async (req, res) => {
     
     await user.save();
 
-    generateToken(res, user._id);
+    const { shouldRemember } = req.body;
+    generateToken(res, user._id, shouldRemember);
 
     return res.status(200).json({
       _id: user._id,
@@ -391,7 +392,8 @@ export const verify2fa = async (req, res) => {
 
     await user.save();
 
-    generateToken(res, user._id);
+    const { shouldRemember } = req.body;
+    generateToken(res, user._id, shouldRemember);
     res.json({
       _id: user._id,
       name: user.name,

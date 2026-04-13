@@ -7,8 +7,8 @@ import Team from '../models/Team.model.js';
  */
 export const getPopulatedTeam = async (teamId) => {
   return await Team.findById(teamId)
-    .populate('owner', 'name email')
-    .populate('members.user', 'name email')
+    .populate('owner', 'name email nodeId')
+    .populate('members.user', 'name email nodeId')
     .populate({
       path: 'projects',
       populate: { path: 'owner', select: 'name' }

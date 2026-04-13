@@ -261,11 +261,6 @@ const TeamDetail = () => {
                          {/* Avatar Node */}
                          <div className="h-14 w-14 rounded-2xl bg-sec border border-col flex items-center justify-center relative shadow-2xl overflow-hidden group-hover:bg-ter transition-colors shrink-0">
                             <span className="text-base font-black text-primary-500">{m.user?.name?.charAt(0).toUpperCase() || '?'}</span>
-                            {!isUser && (
-                              <div className="absolute top-1.5 right-1.5 h-3 w-3 flex items-center justify-center">
-                                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                              </div>
-                            )}
                             <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-primary-500/40 to-transparent"></div>
                          </div>
 
@@ -306,9 +301,12 @@ const TeamDetail = () => {
                                </div>
                             </div>
                             
-                            <span className="text-[10px] text-sec font-bold opacity-30 italic break-all tracking-tighter leading-none">
-                               {m.user?.email || 'OFFLINE_NODE'}
-                            </span>
+                            <div className="flex flex-col gap-0.5 mt-0.5">
+                               <span className="text-[9px] font-black text-primary-500/40 uppercase tracking-[0.2em] leading-none mb-0.5">Node Hash: {m.user?.nodeId || 'N/A'}</span>
+                               <span className="text-[10px] text-sec font-bold opacity-30 italic break-all tracking-tighter leading-none">
+                                  {m.user?.email || 'OFFLINE_NODE'}
+                               </span>
+                            </div>
                          </div>
 
                          {/* Minimalist Removal Action */}

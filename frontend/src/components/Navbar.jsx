@@ -76,18 +76,17 @@ const Navbar = () => {
             {/* Left: Logo Section */}
             <div className="flex items-center">
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="h-8 w-8 bg-primary-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-                   <img src="/premium_logo_v2.png" alt="S" className="h-5 w-5 brightness-0 invert" 
-                        onError={(e) => { e.target.src = "/logo.png"; }} />
+                <div className="h-9 w-9 flex items-center justify-center group-hover:scale-105 transition-all duration-300 drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">
+                   <img src="/logo.svg" alt="Syncodalyze AI" className="h-full w-full object-contain" />
                 </div>
-                <span className="text-lg lg:text-xl font-black tracking-tighter text-main uppercase whitespace-nowrap">
+                <span className="text-xl lg:text-2xl font-black tracking-tighter text-main uppercase whitespace-nowrap">
                   Syncodalyze <span className="text-primary-500">AI</span>
                 </span>
               </Link>
             </div>
 
             {/* Center: Navigation Links (Desktop) */}
-            {user && (
+            {user ? (
               <div className="hidden lg:flex justify-center items-center">
                 <LayoutGroup id="nav-line-group">
                   <div className="flex items-center gap-2">
@@ -95,6 +94,8 @@ const Navbar = () => {
                   </div>
                 </LayoutGroup>
               </div>
+            ) : (
+              <div className="hidden lg:block"></div>
             )}
 
             {/* Right: Actions Section */}
@@ -163,9 +164,13 @@ const Navbar = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-6">
-                  <Link to="/auth" className="text-[11px] font-black uppercase text-sec hover:text-main tracking-widest transition-colors">Sign In</Link>
-                  <Link to="/auth" className="bg-primary-500 text-white px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-primary-500/10 hover:bg-primary-600 transition-all">Get Started</Link>
+                <div className="flex items-center gap-4 lg:gap-8">
+                  <Link to="/auth" className="text-[10px] font-black uppercase text-sec hover:text-primary-500 tracking-[0.2em] transition-all py-2 border-b-2 border-transparent hover:border-primary-500/30">
+                    Sign In
+                  </Link>
+                  <Link to="/auth" className="bg-primary-500 text-white px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-primary-500/20 hover:bg-primary-600 hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/10">
+                    Get Started
+                  </Link>
                 </div>
               )}
             </div>

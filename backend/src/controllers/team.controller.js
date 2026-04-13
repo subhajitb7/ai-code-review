@@ -35,8 +35,8 @@ export const createTeam = async (req, res) => {
 export const getMyTeams = async (req, res) => {
   try {
     const teams = await Team.find({ 'members.user': req.user._id })
-      .populate('owner', 'name email')
-      .populate('members.user', 'name email')
+      .populate('owner', 'name email nodeId')
+      .populate('members.user', 'name email nodeId')
       .sort({ createdAt: -1 });
     res.json(teams);
   } catch (error) {
@@ -50,8 +50,8 @@ export const getMyTeams = async (req, res) => {
 export const getTeamById = async (req, res) => {
   try {
     const team = await Team.findById(req.params.id)
-      .populate('owner', 'name email')
-      .populate('members.user', 'name email')
+      .populate('owner', 'name email nodeId')
+      .populate('members.user', 'name email nodeId')
       .populate({ path: 'projects', populate: { path: 'owner', select: 'name' } });
 
     if (!team) return res.status(404).json({ message: 'Team not found' });

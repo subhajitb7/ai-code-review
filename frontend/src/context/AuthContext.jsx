@@ -49,10 +49,10 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, shouldRemember = true) => {
     try {
-      console.info(`[AUTH] Attempting login for ${email}...`);
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      console.info(`[AUTH] Attempting login for ${email} | shouldRemember: ${shouldRemember}...`);
+      const { data } = await axios.post('/api/auth/login', { email, password, shouldRemember });
       if (data.needsVerification) {
         return { success: false, needsVerification: true, email: data.email, message: data.message };
       }
@@ -77,9 +77,9 @@ export const AuthProvider = ({ children }) => {
 
 
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, shouldRemember = true) => {
     try {
-      const { data } = await axios.post('/api/auth/register', { name, email, password });
+      const { data } = await axios.post('/api/auth/register', { name, email, password, shouldRemember });
       if (data.needsVerification) {
         return { success: false, needsVerification: true, email, message: data.message };
       }
