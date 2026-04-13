@@ -76,7 +76,7 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
       {/* Messages Area */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"
+        className="flex-1 overflow-y-auto p-4 space-y-2 scroll-smooth"
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
@@ -108,35 +108,42 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
             }
 
             return (
-              <div key={msg._id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                <div className={`flex items-end gap-2 max-w-[85%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center border shadow-sm ${
-                    isMe ? 'bg-primary-500 border-primary-600 text-white' : 'bg-sec border-col text-sec'
-                  }`}>
-                    {msg.user?.name?.charAt(0).toUpperCase() || <User className="h-4 w-4" />}
-                  </div>
+              <motion.div 
+                key={msg._id || index}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className={`flex ${isMe ? 'justify-end' : 'justify-start'} w-full mt-2`}
+              >
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]`}>
+                  {/* Name on Top */}
+                  <span className="text-[9px] font-black uppercase tracking-widest text-sec mb-0.5 px-1 opacity-50">
+                     {isMe ? 'You' : msg.user?.name || 'Unknown Node'}
+                  </span>
                   
-                  <div className={`p-3 rounded-2xl text-sm font-medium shadow-sm break-words ${
+                  {/* Message Bubble */}
+                  <div className={`relative px-4 py-2 rounded-2xl text-sm font-medium leading-relaxed transition-all duration-300 shadow-xl border ${
                     isMe 
-                      ? 'bg-primary-500 text-white rounded-br-none' 
-                      : 'bg-sec text-main border border-col rounded-bl-none'
+                      ? `bg-primary-500/10 border-primary-500/20 text-main shadow-primary-500/5 rounded-tr-none` 
+                      : `bg-ter/40 border-white/5 text-main/90 shadow-black/10 rounded-tl-none`
                   }`}>
-                    {msg.text}
+                    <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  </div>
+
+                  {/* Time Below (Asymmetric Alignment) */}
+                  <div className={`mt-0.5 px-1 flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    <span className="text-[8px] font-mono font-bold text-sec/30 uppercase">
+                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
                 </div>
-                <div className={`flex items-center gap-2 mt-1.5 px-10 text-[9px] font-black uppercase tracking-tighter opacity-40 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                   <span>{msg.user?.name}</span>
-                   <span className="h-1 w-1 bg-current rounded-full"></span>
-                   <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-              </div>
+              </motion.div>
             );
           })
         )}
       </div>
 
       {/* Footer Area */}
-      <div className="p-6 border-t border-col bg-sec/30 backdrop-blur-md">
+      <div className="p-3 border-t border-col bg-sec/30 backdrop-blur-md">
         {typingUser && (
           <div className="mb-3 px-2 flex items-center gap-2 animate-pulse">
             <div className="flex gap-1">
@@ -151,45 +158,44 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
         )}
         
         <form onSubmit={handleSendMessage} className="relative group">
-          <textarea
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              handleTyping();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(e);
-              }
-            }}
-            placeholder="Type a message..."
-            className="w-full bg-main border border-col rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-primary-500/50 transition-all resize-none shadow-inner"
-            rows={2}
-          />
-          <div className="absolute bottom-2 right-2 flex items-center gap-2">
-            <button
-               type="button"
-               onClick={isListening ? stopListening : startListening}
-               className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${
-                 isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-sec text-sec hover:text-primary-500'
-               }`}
-               title={isListening ? 'Stop Listening' : 'Voice Typing'}
-            >
-              {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-            </button>
-            <button
-               type="submit"
-               disabled={!text.trim()}
-               className="h-10 w-10 bg-primary-500 text-white rounded-xl shadow-lg shadow-primary-500/20 flex items-center justify-center hover:bg-primary-600 transition-all disabled:opacity-50 active:scale-95"
-            >
-              <Send className="h-5 w-5" />
-            </button>
+          <div className="flex items-end gap-2 bg-main border border-col rounded-2xl p-2 focus-within:border-primary-500/50 transition-all shadow-inner">
+            <textarea
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                handleTyping();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e);
+                }
+              }}
+              placeholder="Type a message..."
+              className="flex-1 bg-transparent px-3 py-2 text-sm font-medium outline-none transition-all resize-none min-h-[40px] max-h-[120px] custom-scrollbar"
+              rows={1}
+            />
+            <div className="flex items-center gap-1.5 shrink-0 pb-0.5">
+              <button
+                 type="button"
+                 onClick={isListening ? stopListening : startListening}
+                 className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${
+                   isListening ? 'bg-red-500 text-white animate-pulse' : 'text-sec hover:text-primary-500 hover:bg-sec'
+                 }`}
+                 title={isListening ? 'Stop Listening' : 'Voice Typing'}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </button>
+              <button
+                 type="submit"
+                 disabled={!text.trim()}
+                 className="h-9 w-9 bg-primary-500 text-white rounded-xl shadow-lg shadow-primary-500/20 flex items-center justify-center hover:bg-primary-600 transition-all disabled:opacity-50 active:scale-95"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </form>
-        <p className="text-[9px] text-center text-sec mt-4 font-black uppercase tracking-[0.2em] opacity-30">
-          Encrypted Collaborative Stream
-        </p>
       </div>
     </div>
   );

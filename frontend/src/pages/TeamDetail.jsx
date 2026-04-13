@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { AuthContext } from '../context/AuthContext';
-import { ArrowLeft, Users, Trash2, Crown, ShieldCheck, User as UserIcon, FolderOpen, X, UserPlus, MessageSquare, Plus, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Users, Trash2, Crown, ShieldCheck, User as UserIcon, FolderOpen, X, UserPlus, MessageSquare, Plus, ChevronRight, History } from 'lucide-react';
 
 import TeamChatDrawer from '../components/TeamChatDrawer';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
@@ -219,16 +219,27 @@ const TeamDetail = () => {
         </div>
 
         {/* Tactical Grid: Members and Assets */}
+        {/* Section Headers - Aligned on Single Line */}
+        <div className="flex items-center gap-10 mb-6 px-2">
+           <div className="flex-1 flex items-center gap-6">
+              <h2 className="text-[11px] font-black text-main uppercase tracking-[0.4em] flex items-center gap-3 whitespace-nowrap">
+                 Authorized Operators <span className="h-5 px-2 bg-primary-500/10 border border-primary-500/20 text-primary-500 rounded flex items-center justify-center tracking-normal text-[10px]">{team.members?.length || 0}</span>
+              </h2>
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-col/30 to-transparent"></div>
+           </div>
+           <div className="hidden lg:flex flex-[0.7] items-center gap-6">
+              <h2 className="text-[11px] font-black text-main uppercase tracking-[0.4em] flex items-center gap-3 whitespace-nowrap">
+                 Asset Cluster <span className="text-sec opacity-20 font-medium">/ SYNC_ACTIVE</span>
+              </h2>
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-col/30 to-transparent"></div>
+           </div>
+        </div>
+
+        {/* Tactical Grid: Members and Assets */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
            
            {/* Section 1: Authorized Operators (3/5) */}
-           <div className="lg:col-span-3 space-y-6">
-              <div className="flex items-center justify-between px-2">
-                 <h2 className="text-[11px] font-black text-main uppercase tracking-[0.4em] flex items-center gap-3">
-                    Authorized Operators <span className="h-5 px-2 bg-primary-500/10 border border-primary-500/20 text-primary-500 rounded flex items-center justify-center tracking-normal text-[10px]">{team.members?.length || 0}</span>
-                 </h2>
-                 <div className="h-[1px] flex-1 mx-6 bg-gradient-to-r from-col/30 to-transparent"></div>
-              </div>
+           <div className="lg:col-span-3">
 
               <motion.div 
                  variants={{
@@ -259,34 +270,32 @@ const TeamDetail = () => {
                          </div>
 
                          {/* Identity Stack */}
-                         <div className="flex flex-col gap-2 min-w-0 flex-1 transition-all">
-                            <div className="flex items-center gap-3">
+                         <div className="flex flex-col gap-1 min-w-0 flex-1 transition-all">
+                            <div className="flex items-center gap-3 flex-wrap">
                                <span className="text-sm font-black text-main group-hover:text-primary-500 transition-colors tracking-tight uppercase whitespace-nowrap">{m.user?.name || 'Unknown'}</span>
                                {m.role === 'owner' ? (
                                  <Crown className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                                ) : m.role === 'admin' ? (
                                  <ShieldCheck className="h-3.5 w-3.5 text-primary-500 shrink-0" />
                                ) : null}
-                            </div>
-                            
-                             <div className="flex flex-col gap-1.5">
-                               <div className="flex items-center gap-2">
+
+                               <div className="flex items-center">
                                  {canManage && m.role !== 'owner' && !isUser ? (
                                    <div className="relative group/role">
                                      <select
                                        value={m.role}
                                        onChange={(e) => handleRoleChange(m.user?._id || m.user || m._id, e.target.value)}
-                                       className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded border leading-none bg-main/40 cursor-pointer hover:border-primary-500 transition-all outline-none appearance-none pr-6 ${
+                                       className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border leading-none bg-main/40 cursor-pointer hover:border-primary-500 transition-all outline-none appearance-none pr-5 ${
                                          m.role === 'admin' ? 'text-primary-600 border-primary-500/20' : 'text-sec/60 border-col'
                                        }`}
                                      >
                                        <option value="member">MEMBER</option>
                                        <option value="admin">ADMIN</option>
                                      </select>
-                                     <ChevronRight className="h-2.5 w-2.5 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-sec/40 rotate-90" />
+                                     <ChevronRight className="h-2 w-2 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-sec/40 rotate-90" />
                                    </div>
                                  ) : (
-                                   <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded border leading-none shrink-0 ${
+                                   <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded border leading-none shrink-0 ${
                                      m.role === 'owner' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
                                      m.role === 'admin' ? 'bg-primary-500/10 text-primary-600 border-primary-500/20' :
                                      'bg-sec/50 text-sec/60 border-col'
@@ -295,10 +304,11 @@ const TeamDetail = () => {
                                    </span>
                                  )}
                                </div>
-                               <span className="text-[10px] text-sec font-bold opacity-30 italic break-all tracking-tighter leading-none">
-                                 {m.user?.email || 'OFFLINE_NODE'}
-                               </span>
                             </div>
+                            
+                            <span className="text-[10px] text-sec font-bold opacity-30 italic break-all tracking-tighter leading-none">
+                               {m.user?.email || 'OFFLINE_NODE'}
+                            </span>
                          </div>
 
                          {/* Minimalist Removal Action */}
@@ -318,13 +328,7 @@ const TeamDetail = () => {
            </div>
 
            {/* Section 2: Integrated Asset Cluster (2/5) */}
-           <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between px-2">
-                 <h2 className="text-[11px] font-black text-main uppercase tracking-[0.4em] flex items-center gap-3">
-                    Asset Cluster <span className="text-sec opacity-20 font-medium">/ SYNC_ACTIVE</span>
-                 </h2>
-                 <div className="h-[1px] flex-1 ml-6 bg-gradient-to-r from-col/30 to-transparent"></div>
-              </div>
+           <div className="lg:col-span-2">
 
               <motion.div 
                  initial={{ opacity: 0, x: 20 }}
@@ -477,31 +481,6 @@ const TeamDetail = () => {
         )}
       </AnimatePresence>
 
-         {/* Kernel Audit Trail - Scoped to Team */}
-         <div className="mt-16 space-y-6">
-            <div className="flex items-center justify-between px-2">
-               <h2 className="text-[11px] font-black text-main uppercase tracking-[0.4em] flex items-center gap-3">
-                  Kernel Audit Trail <span className="text-sec opacity-20 font-medium">/ NODE_SPECIFIC</span>
-               </h2>
-               <div className="h-[1px] flex-1 mx-6 bg-gradient-to-r from-col/30 to-transparent"></div>
-            </div>
-            
-            <div className="glass-panel overflow-hidden border-col shadow-2xl">
-               <div className="p-8 border-b border-col bg-ter/30 flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary-500/10 rounded-lg"><History className="h-5 w-5 text-primary-500" /></div>
-                      <span className="text-[10px] font-black text-main uppercase tracking-widest">Chronological Operational Telemetry</span>
-                   </div>
-                   <div className="flex items-center gap-2 px-3 py-1.5 bg-primary-500/5 border border-primary-500/10 rounded-full">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse"></div>
-                      <span className="text-[8px] font-black text-primary-500 uppercase tracking-widest italic">Live Feed Synchronized</span>
-                   </div>
-               </div>
-               <div className="p-8">
-                  <KernelAuditTrail teamId={id} />
-               </div>
-            </div>
-         </div>
       </div>
       <ConfirmModal
         isOpen={confirmConfig.isOpen}

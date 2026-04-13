@@ -6,7 +6,7 @@ import useSpeechToText from '../hooks/useSpeechToText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Send, User, Sparkles, MessageSquare, 
-  Mic, MicOff 
+  Mic, MicOff
 } from 'lucide-react';
 
 
@@ -137,7 +137,7 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
       {/* Message Stream with Logic-Based Grouping */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-8 space-y-2 scroll-smooth custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-2 scroll-smooth custom-scrollbar"
       >
         <AnimatePresence mode="popLayout">
           {messages.length === 0 && !loading ? (
@@ -152,20 +152,18 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
           ) : (
             messages.map((msg, index) => {
               const isMe = msg.user?._id === user?._id;
-              const prevMsg = messages[index - 1];
-              const isSameUserAsPrev = prevMsg && (prevMsg.user?._id === msg.user?._id);
-              const isNextSameUser = messages[index + 1] && (messages[index + 1].user?._id === msg.user?._id);
               
               const msgDate = new Date(msg.createdAt).toDateString();
+              const prevMsg = messages[index - 1];
               const prevMsgDate = prevMsg ? new Date(prevMsg.createdAt).toDateString() : null;
               const showDateDivider = msgDate !== prevMsgDate;
 
               return (
                 <div key={msg._id || index} className="flex flex-col">
                   {showDateDivider && (
-                    <div className="flex items-center gap-4 py-8 opacity-20">
+                    <div className="flex items-center gap-4 py-3 opacity-20">
                       <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-col"></div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.4em] whitespace-nowrap">
+                      <span className="text-[10px] font-black uppercase tracking-[0.4em] whitespace-nowrap font-mono">
                         {new Date(msg.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                       <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-col"></div>
@@ -174,48 +172,32 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
 
                   <motion.div 
                     layout
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${isSameUserAsPrev ? 'mt-1' : 'mt-6'}`}
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className={`flex ${isMe ? 'justify-end' : 'justify-start'} w-full mt-2`}
                   >
-                    <div className={`flex items-start gap-4 w-full ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* Fixed Left Time Display */}
-                      <div className="w-10 shrink-0 flex items-center justify-center mt-3">
-                         <span className="text-[9px] font-black text-sec tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity">
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                         </span>
+                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%]`}>
+                      {/* Name on Top */}
+                      <span className="text-[10px] font-black uppercase tracking-widest text-sec mb-1 px-1 opacity-60">
+                         {isMe ? 'You' : msg.user?.name || 'Unknown Node'}
+                      </span>
+                      
+                      {/* Message Bubble */}
+                      <div className={`group relative px-4 py-2 rounded-2xl text-[13px] font-medium leading-relaxed transition-all duration-300 shadow-xl border ${
+                        isMe 
+                          ? `bg-primary-500/10 border-primary-500/20 text-main shadow-primary-500/5 rounded-tr-none` 
+                          : `bg-ter/40 border-white/5 text-main/90 shadow-black/10 rounded-tl-none`
+                      }`}>
+                        <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                       </div>
 
-                      <div className={`flex items-start gap-3 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                        {/* Conditional Avatar Profile */}
-                        {!isSameUserAsPrev ? (
-                          <div className={`h-8 w-8 rounded-lg shrink-0 flex items-center justify-center border shadow-md text-[10px] font-black relative ${
-                            isMe ? 'bg-primary-500/10 border-primary-500/20 text-primary-500' : 'bg-ter border-col text-sec'
-                          }`}>
-                            {msg.user?.name?.charAt(0).toUpperCase() || '?'}
-                            <div className={`absolute -bottom-0.5 ${isMe ? '-left-0.5' : '-right-0.5'} h-2 w-2 rounded-full border-2 border-main bg-emerald-500`}></div>
-                          </div>
-                        ) : (
-                          <div className="w-8 shrink-0"></div>
-                        )}
-                        
-                        {/* Minimalist Glass Bubble */}
-                        <div className={`group relative px-4 py-3 rounded-2xl text-[13px] font-medium leading-relaxed transition-all duration-300 ${
-                          isMe 
-                            ? `bg-primary-500/5 text-main border border-primary-500/10 hover:border-primary-500/30 ${isSameUserAsPrev ? 'rounded-tr-lg' : 'rounded-tr-none'}` 
-                            : `bg-ter/30 text-main border border-col hover:border-col*2 ${isSameUserAsPrev ? 'rounded-tl-lg' : 'rounded-tl-none'}`
-                        }`}>
-                          {msg.text}
-                        </div>
+                      {/* Time Below (Asymmetric Alignment) */}
+                      <div className={`mt-0.5 px-1 flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}>
+                        <span className="text-[8px] font-mono font-bold text-sec/30 uppercase">
+                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
                     </div>
-                    
-                    {/* Detailed Meta */}
-                    {!isNextSameUser && (
-                      <div className={`flex items-center gap-2 mt-1.5 px-24 text-[8px] font-black uppercase tracking-[0.1em] opacity-20 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                         <span>{isMe ? 'OPERATOR' : msg.user?.name?.split(' ')[0]}</span>
-                      </div>
-                    )}
                   </motion.div>
                 </div>
               );
@@ -240,18 +222,13 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
           </motion.div>
         )}
         
-        <div ref={messagesEndRef} className="h-4" />
+        <div ref={messagesEndRef} className="h-1" />
       </div>
 
-      {/* Redesigned Floating Input Console */}
-      <div className="p-6 bg-ter/5 pb-10">
+      {/* Refined Compact Floating Input Console */}
+      <div className="p-4 bg-ter/5 pb-4">
         <form onSubmit={handleSendMessage} className="relative group">
-          <div className="glass-panel rounded-2xl border-col/30 focus-within:border-primary-500/40 transition-all bg-main/40 overflow-hidden shadow-2xl">
-             <div className="px-4 pt-3 flex items-center justify-between opacity-30">
-               <span className="text-[8px] font-black uppercase tracking-widest">{isListening ? 'Streaming_Voice' : 'Ready_for_input'}</span>
-               <span className="text-[8px] font-black uppercase tracking-widest font-mono">ENCRYPTED_LINE_O8</span>
-             </div>
-             
+          <div className="glass-panel rounded-2xl border-col/30 focus-within:border-primary-500/40 transition-all bg-main/40 overflow-hidden shadow-2xl flex items-end p-2 gap-2">
              <textarea
                value={text}
                onChange={(e) => {
@@ -265,15 +242,15 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
                  }
                }}
                placeholder="Write a message..."
-               className="w-full bg-transparent px-5 py-4 text-sm font-medium outline-none transition-all resize-none min-h-[80px]"
+               className="flex-1 bg-transparent px-3 py-2.5 text-sm font-medium outline-none transition-all resize-none min-h-[44px] max-h-[120px] custom-scrollbar"
                rows={1}
              />
              
-             <div className="px-4 pb-4 flex items-center justify-end gap-2">
+             <div className="flex items-center gap-1.5 shrink-0 pb-0.5">
                <button
                   type="button"
                   onClick={isListening ? stopListening : startListening}
-                  className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${
+                  className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${
                     isListening 
                       ? 'bg-rose-500 text-white animate-pulse' 
                       : 'text-sec hover:text-primary-500 hover:bg-sec/50'
@@ -285,9 +262,9 @@ const TeamChatDrawer = ({ teamId, isOpen, onClose }) => {
                <button
                   type="submit"
                   disabled={!text.trim()}
-                  className="h-10 px-5 bg-primary-500 text-white rounded-xl shadow-lg shadow-primary-500/20 flex items-center gap-2 hover:bg-primary-600 transition-all disabled:opacity-30 disabled:grayscale active:scale-95 text-[10px] font-black uppercase tracking-wider"
+                  className="h-9 w-9 bg-primary-500 text-white rounded-xl shadow-lg shadow-primary-500/20 flex items-center justify-center hover:bg-primary-600 transition-all disabled:opacity-30 disabled:grayscale active:scale-95"
                >
-                 Transmit <Send className="h-3.5 w-3.5" />
+                 <Send className="h-4 w-4" />
                </button>
              </div>
           </div>

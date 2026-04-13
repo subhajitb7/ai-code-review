@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useContext, useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import {
   LogOut, User as UserIcon, Shield, ChevronDown,
@@ -9,6 +9,27 @@ import {
 } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
+
+const NavLink = ({ to, label, isActive, mobile }) => {
+  const active = isActive(to);
+  return (
+    <Link 
+      to={to} 
+      className={`flex items-center gap-2 text-[10px] sm:text-[11px] font-black transition-all relative whitespace-nowrap tracking-[0.2em] uppercase ${
+        mobile ? 'px-8 py-5 hover:bg-sec/10 border-b border-col/30' : 'px-4 py-2'
+      } ${active ? 'text-primary-500' : 'text-sec hover:text-main'}`}
+    >
+      {label}
+      {active && !mobile && (
+        <motion.div 
+          layoutId="nav-line"
+          className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary-500"
+          transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
+        />
+      )}
+    </Link>
+  );
+};
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -39,27 +60,6 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
   const isAdmin = user?.role === 'admin';
 
-  const NavLink = ({ to, label, icon: Icon, mobile }) => {
-    const active = isActive(to);
-    return (
-      <Link 
-        to={to} 
-        className={`flex items-center gap-2 text-[10px] sm:text-[11px] font-black transition-all relative whitespace-nowrap tracking-[0.2em] uppercase ${
-          mobile ? 'px-8 py-5 hover:bg-sec/10 border-b border-col/30' : 'px-4 py-2'
-        } ${active ? 'text-primary-500' : 'text-sec hover:text-main'}`}
-      >
-        {label}
-        {active && !mobile && (
-          <motion.div 
-            layoutId="nav-line"
-            className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary-500"
-            transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-          />
-        )}
-      </Link>
-    );
-  };
-
   const navLinks = [
     { to: '/dashboard', label: 'Monitor' },
     { to: '/projects', label: 'Projects' },
@@ -71,16 +71,16 @@ const Navbar = () => {
     <>
       <nav className="border-b border-col bg-main/90 backdrop-blur-2xl fixed top-0 left-0 right-0 z-[100] w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex items-center justify-between h-16 md:h-16">
+          <div className="grid grid-cols-3 h-16 items-center translate-y-[1px]">
             
             {/* Left: Logo Section */}
-            <div className="flex items-center shrink-0">
+            <div className="flex items-center">
               <Link to="/" className="flex items-center gap-3 group">
                 <div className="h-8 w-8 bg-primary-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
                    <img src="/premium_logo_v2.png" alt="S" className="h-5 w-5 brightness-0 invert" 
                         onError={(e) => { e.target.src = "/logo.png"; }} />
                 </div>
-                <span className="text-lg lg:text-xl font-black tracking-tighter text-main uppercase">
+                <span className="text-lg lg:text-xl font-black tracking-tighter text-main uppercase whitespace-nowrap">
                   Syncodalyze <span className="text-primary-500">AI</span>
                 </span>
               </Link>
@@ -88,15 +88,17 @@ const Navbar = () => {
 
             {/* Center: Navigation Links (Desktop) */}
             {user && (
-              <div className="hidden lg:flex items-center absolute left-1/2 -translate-x-1/2">
-                <div className="flex items-center gap-2">
-                  {navLinks.map((link) => <NavLink key={link.to} {...link} />)}
-                </div>
+              <div className="hidden lg:flex justify-center items-center">
+                <LayoutGroup id="nav-line-group">
+                  <div className="flex items-center gap-2">
+                    {navLinks.map((link) => <NavLink key={link.to} {...link} isActive={isActive} />)}
+                  </div>
+                </LayoutGroup>
               </div>
             )}
 
             {/* Right: Actions Section */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center justify-end gap-2 shrink-0">
               {user ? (
                 <div className="flex items-center gap-2">
                   <NotificationBell />
@@ -121,7 +123,7 @@ const Navbar = () => {
                       } group-hover:scale-105 transition-transform shadow-md border border-white/10`}>
                         {user.name?.charAt(0).toUpperCase()}
                       </div>
-                      <ChevronDown className={`h-3 w-3 text-sec transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-3 w-3 text-sec transition-transform duration-300 transform-gpu ${userMenuOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     <AnimatePresence>
@@ -180,7 +182,7 @@ const Navbar = () => {
               className="lg:hidden bg-main border-b border-col overflow-hidden"
             >
               <div className="flex flex-col">
-                {navLinks.map((link) => <NavLink key={link.to} {...link} mobile />)}
+                {navLinks.map((link) => <NavLink key={link.to} {...link} isActive={isActive} mobile />)}
                 <div className="p-8 flex flex-col gap-4">
                    <Link to="/profile" className="text-[10px] font-black text-sec uppercase tracking-widest flex items-center gap-3"><Settings className="h-4 w-4" /> Profile</Link>
                    <button onClick={() => setShowLogoutConfirm(true)} className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-3 text-left"><LogOut className="h-4 w-4" /> Sign Out</button>

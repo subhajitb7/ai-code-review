@@ -6,7 +6,6 @@ import Comment from '../models/Comment.model.js';
 import Notification from '../models/Notification.model.js';
 import AiLog from '../models/AiLog.model.js';
 import SystemSettings from '../models/SystemSettings.model.js';
-import AuditLog from '../models/AuditLog.model.js';
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -53,15 +52,6 @@ export const deleteUser = async (req, res) => {
     await Notification.deleteMany({ user: user._id });
     await User.findByIdAndDelete(req.params.id);
 
-    // Create Audit Log
-    await AuditLog.create({
-      action: 'DELETE_USER',
-      actor: req.user._id,
-      details: `Permanently deleted user: ${user.name} (${user.email})`,
-      metadata: { targetEmail: user.email },
-      ipAddress: req.ip || req.connection.remoteAddress
-    });
-
     res.json({ message: 'User and all associated data deleted' });
   } catch (error) {
     console.error(error);
@@ -96,16 +86,6 @@ export const updateUserRole = async (req, res) => {
     user.role = role;
     await user.save();
 
-    // Create Audit Log
-    await AuditLog.create({
-      action: 'UPDATE_ROLE',
-      actor: req.user._id,
-      targetUser: user._id,
-      details: `Updated role for ${user.name} from ${oldRole} to ${role}`,
-      metadata: { oldRole, newRole: role },
-      ipAddress: req.ip || req.connection.remoteAddress
-    });
-
     res.json({ _id: user._id, name: user.name, email: user.email, role: user.role });
   } catch (error) {
     console.error(error);
@@ -136,15 +116,6 @@ export const deleteReview = async (req, res) => {
 
     await Comment.deleteMany({ review: review._id });
     await Review.findByIdAndDelete(req.params.id);
-    
-    // Create Audit Log
-    await AuditLog.create({
-      action: 'PURGE_ANALYSIS',
-      actor: req.user._id,
-      details: `Purged analysis node: ${review.title} (Owner: ${review.user?.name || 'Unknown'})`,
-      metadata: { reviewId: review._id, reviewTitle: review.title },
-      ipAddress: req.ip || req.connection.remoteAddress
-    });
 
     res.json({ message: 'Review and comments deleted' });
   } catch (error) {
@@ -236,15 +207,6 @@ export const updateSystemSettings = async (req, res) => {
     settings.updatedBy = req.user._id;
     await settings.save();
 
-    // Create Audit Log
-    await AuditLog.create({
-      action: 'UPDATE_SETTINGS',
-      actor: req.user._id,
-      details: `Updated platform settings`,
-      metadata: { updates: req.body },
-      ipAddress: req.ip || req.connection.remoteAddress
-    });
-
     res.json(settings);
   } catch (error) {
     console.error(error);
@@ -272,36 +234,9 @@ export const toggleUserSuspension = async (req, res) => {
     user.isSuspended = !user.isSuspended;
     await user.save();
 
-    // Create Audit Log
-    const logAction = user.isSuspended ? 'SUSPEND_USER' : 'UNSUSPEND_USER';
-    await AuditLog.create({
-      action: logAction,
-      actor: req.user._id,
-      targetUser: user._id,
-      details: `${user.isSuspended ? 'Suspended' : 'Unsuspended'} user ${user.name}`,
-      metadata: { isSuspended: user.isSuspended },
-      ipAddress: req.ip || req.connection.remoteAddress
-    });
-
     res.json({ _id: user._id, name: user.name, email: user.email, isSuspended: user.isSuspended });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// @desc    Get all audit logs
-// @route   GET /api/admin/audit-logs
-export const getAuditLogs = async (req, res) => {
-  try {
-    const logs = await AuditLog.find({})
-      .populate('actor', 'name email')
-      .populate('targetUser', 'name email')
-      .sort({ createdAt: -1 })
-      .limit(100);
-    res.json(logs);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error fetching audit logs' });
   }
 };

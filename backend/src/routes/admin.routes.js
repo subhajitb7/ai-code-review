@@ -2,8 +2,7 @@ import express from 'express';
 import {
   getAllUsers, deleteUser, updateUserRole,
   getAllReviews, deleteReview, getAdminStats,
-  getSystemSettings, updateSystemSettings, toggleUserSuspension,
-  getAuditLogs
+  getSystemSettings, updateSystemSettings, toggleUserSuspension
 } from '../controllers/admin.controller.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { adminOnly } from '../middleware/roleMiddleware.js';
@@ -19,6 +18,5 @@ router.get('/reviews', protect, adminOnly, getAllReviews);
 router.delete('/reviews/:id', protect, adminOnly, deleteReview);
 router.get('/settings', protect, adminOnly, getSystemSettings);
 router.put('/settings', protect, adminOnly, updateSystemSettings);
-router.get('/audit-logs', protect, adminOnly, getAuditLogs);
 
 export default router;

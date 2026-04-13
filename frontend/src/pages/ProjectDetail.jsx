@@ -478,8 +478,8 @@ const ProjectDetail = () => {
           ))}
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start relative z-10">
-        <div className={project.team ? "lg:col-span-3" : "lg:col-span-4"}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start relative z-10">
+        <div className={project.team ? "lg:col-span-2" : "lg:col-span-3"}>
           <div className="glass-panel p-8 shadow-2xl relative overflow-hidden group transition-all duration-500 border-col/50 bg-ter/10">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[120px] pointer-events-none group-hover:bg-primary-500/10 transition-all"></div>
             
@@ -582,7 +582,7 @@ const ProjectDetail = () => {
         </div>
 
         {project.team && (
-          <div className="lg:col-span-1 sticky top-32 h-[calc(100vh-200px)] max-h-[80vh] min-h-[400px]">
+          <div className="lg:col-span-1 sticky top-32 h-[calc(100vh-280px)] max-h-[70vh] min-h-[350px]">
             <motion.div 
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
