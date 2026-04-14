@@ -12,7 +12,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [shouldRemember, setShouldRemember] = useState(true);
+  const [shouldRemember, setShouldRemember] = useState(false);
 
   const { login, register, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -197,7 +197,7 @@ const AuthPage = () => {
                 {isLogin && (
                   <div className="flex justify-between items-center px-1 -mt-1">
                     <label className="flex items-center gap-2 cursor-pointer grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all">
-                       <input type="checkbox" className="h-3 w-3 rounded border-col bg-ter accent-primary-500" />
+                       <input type="checkbox" checked={shouldRemember} onChange={(e) => setShouldRemember(e.target.checked)} className="h-3 w-3 rounded border-col bg-ter accent-primary-500" />
                        <span className="text-[9px] font-black text-sec uppercase tracking-widest">Stay Logged In</span>
                     </label>
                     <Link to="/forgot-password" className="text-[9px] font-black text-primary-500 uppercase tracking-widest hover:text-primary-400 transition-colors">

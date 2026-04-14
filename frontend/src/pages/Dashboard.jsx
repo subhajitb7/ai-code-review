@@ -242,7 +242,7 @@ const Dashboard = () => {
               </div>
 
               <div className="w-full md:w-64 h-64 min-h-[256px] shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                   <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                     <PolarGrid stroke="var(--border-col)" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-sec)', fontSize: 10, fontWeight: 700 }} />
@@ -322,7 +322,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-24 min-h-[96px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
@@ -347,7 +347,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="h-24 min-h-[96px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <LineChart data={chartData}>
                       <Line type="step" dataKey="bugs" stroke="#ef4444" strokeWidth={3} dot={false} />
                     </LineChart>
