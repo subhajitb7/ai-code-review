@@ -3,14 +3,11 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, LineChart, Line
+  AreaChart, Area, ResponsiveContainer,
+  RadarChart, PolarGrid, PolarAngleAxis, Radar, LineChart, Line
 } from 'recharts';
 import {
-  FileCode, History, Plus, AlertCircle, CheckCircle2,
-  BarChart3, Bug, CheckCircle, Shield, Loader2, Upload, 
-  ChevronRight, Sparkles, Terminal, Cpu, Zap, Activity,
-  Globe, Search, Settings, LayoutDashboard
+  FileCode, Bug, Shield, ChevronRight, Sparkles, Terminal, Cpu, Zap, Activity
 } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
 import { AuthContext } from '../context/AuthContext';

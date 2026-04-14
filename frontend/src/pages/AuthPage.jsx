@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, Layout, ArrowRight, ShieldCheck, Zap, Cpu } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import GithubIcon from '../components/GithubIcon';
 
 const AuthPage = () => {
@@ -87,7 +87,7 @@ const AuthPage = () => {
           
           <div className="flex flex-col gap-4 max-w-sm mx-auto">
              <div className="flex items-start gap-4 p-4 bg-ter/30 border border-col rounded-2xl backdrop-blur-sm">
-                <ShieldCheck className="h-5 w-5 text-emerald-500 mt-1" />
+                <Lock className="h-5 w-5 text-emerald-500 mt-1" />
                 <div className="text-left">
                    <p className="text-[10px] font-black text-sec uppercase tracking-widest mb-1">Integrity Cluster</p>
                    <p className="text-xs text-sec font-medium">Verify your Node ID to access secure communication channels.</p>
