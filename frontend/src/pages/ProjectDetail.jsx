@@ -13,6 +13,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { SocketPubSubContext } from '../context/SocketPubSubContext';
 import CommentSection from '../components/CommentSection';
 import ConfirmModal from '../components/ConfirmModal';
+import Editor from '@monaco-editor/react';
 
 const ProjectDetail = () => {
   const { theme } = useContext(ThemeContext);

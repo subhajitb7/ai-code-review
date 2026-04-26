@@ -176,7 +176,7 @@ export const uploadFile = async (req, res) => {
 
     res.status(201).json(codeFile);
 
-    await postSystemMessage(req, project._id, `🚀 uploaded new file: ${filename}`);
+    await postSystemMessage(req, project._id, `uploaded new file: ${filename}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -237,7 +237,7 @@ export const bulkUploadFiles = async (req, res) => {
 
     res.status(201).json({ message: `Successfully uploaded ${uploadedFiles.length} files`, files: uploadedFiles });
 
-    await postSystemMessage(req, project._id, `🚀 bulk uploaded ${uploadedFiles.length} files`);
+    await postSystemMessage(req, project._id, `bulk uploaded ${uploadedFiles.length} files`);
 
   } catch (error) {
     console.error(error);

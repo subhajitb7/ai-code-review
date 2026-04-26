@@ -93,7 +93,7 @@ const ProjectChatDrawer = ({ projectId, isOpen, onClose, initialMessages: messag
           </div>
         ) : (
           messages.map((msg, index) => {
-            const isSystem = msg.text.startsWith('🚀') || msg.text.startsWith('🗑️') || msg.text.startsWith('🔄');
+            const isSystem = msg.text.startsWith('🚀') || msg.text.startsWith('🗑️') || msg.text.startsWith('🔄') || msg.text.startsWith('uploaded new') || msg.text.startsWith('bulk uploaded');
             const isMe = msg.user?._id === user._id;
             
             if (isSystem) {
