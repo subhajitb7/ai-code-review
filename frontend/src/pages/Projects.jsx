@@ -7,7 +7,6 @@ import {
   ChevronRight, LayoutGrid, List, Search as SearchIcon,
   Box, Zap, Calendar, User, ArrowUpRight, Filter
 } from 'lucide-react';
-import SearchBar from '../components/SearchBar';
 import ConfirmModal from '../components/ConfirmModal';
 
 const Projects = () => {
@@ -132,7 +131,6 @@ const Projects = () => {
                 <List className="h-4 w-4" />
               </button>
             </div>
-            <SearchBar />
             <button 
               onClick={() => setShowModal(true)} 
               className="btn-primary flex items-center gap-2 h-11 px-6 shadow-xl shadow-primary-500/20"

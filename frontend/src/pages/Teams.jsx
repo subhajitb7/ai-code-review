@@ -8,7 +8,6 @@ import {
   ChevronRight, ArrowUpRight, Search as SearchIcon,
   Shield, Network, Zap, Calendar, Activity
 } from 'lucide-react';
-import SearchBar from '../components/SearchBar';
 import ConfirmModal from '../components/ConfirmModal';
 
 const Teams = () => {
@@ -110,7 +109,6 @@ const Teams = () => {
             animate={{ x: 0, opacity: 1 }}
             className="flex flex-wrap items-center gap-3"
           >
-            <SearchBar />
             <button 
               onClick={() => setShowCreate(true)} 
               className="btn-primary flex items-center gap-2 h-11 px-6 shadow-xl shadow-primary-500/20"

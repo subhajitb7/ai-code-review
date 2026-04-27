@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
+import SearchBar from './SearchBar';
 
 const NavLink = ({ to, label, isActive, mobile }) => {
   const active = isActive(to);
@@ -99,9 +100,10 @@ const Navbar = () => {
             )}
 
             {/* Right: Actions Section */}
-            <div className="flex items-center justify-end gap-2 shrink-0">
+            <div className="flex items-center justify-end gap-1.5 shrink-0">
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <SearchBar />
                   <NotificationBell />
                   
                   <button
@@ -112,7 +114,7 @@ const Navbar = () => {
                     {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   </button>
 
-                  <div className="relative ml-2" ref={userMenuRef}>
+                  <div className="relative ml-1" ref={userMenuRef}>
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center gap-2 group"
