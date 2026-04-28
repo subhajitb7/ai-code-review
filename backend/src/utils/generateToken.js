@@ -10,6 +10,7 @@ const generateToken = (res, userId, shouldRemember = true) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
+    domain: isProduction ? '.subhajitbag.in' : 'localhost',
   };
 
   if (shouldRemember) {

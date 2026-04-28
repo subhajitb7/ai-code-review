@@ -206,6 +206,7 @@ export const logoutUser = (req, res) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
+    domain: isProduction ? '.subhajitbag.in' : 'localhost',
     expires: new Date(0),
   });
 
@@ -437,6 +438,7 @@ export const deleteUserProfile = async (req, res) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? '.subhajitbag.in' : 'localhost',
       expires: new Date(0),
     });
 
