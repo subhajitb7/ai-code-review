@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import axios from 'axios';
-import { MessageSquare, Send, X, Bot, User, Loader2, Minimize2, Mic, MicOff } from 'lucide-react';
+import { MessageSquare, Send, X, Bot, User, Loader2, Minimize2, Mic, MicOff, Copy, Check } from 'lucide-react';
 import useSpeechToText from '../hooks/useSpeechToText';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -89,14 +89,56 @@ const AiChatFloating = () => {
                   </div>
                   <div className={`p-3 rounded-2xl text-sm ${
                     m.role === 'user' 
-                      ? 'bg-primary-600 text-white rounded-tr-none shadow-lg shadow-primary-500/20' 
-                      : 'bg-sec border border-col text-main rounded-tl-none'
+                      ? 'bg-primary-600 text-white rounded-tr-none shadow-lg shadow-primary-500/20 w-fit' 
+                      : 'bg-ter border border-col text-main rounded-tl-none w-full overflow-hidden'
                   }`}>
-                    <div className={`ai-feedback-content prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {m.content}
-                      </ReactMarkdown>
-                    </div>
+                    {m.role === 'user' ? (
+                      <div className="whitespace-pre-wrap">{m.content}</div>
+                    ) : (
+                      <div className={`ai-feedback-content max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code({ node, inline, className, children, ...props }) {
+                              const match = /language-(\w+)/.exec(className || '');
+                              const codeContent = String(children).replace(/\n$/, '');
+                              
+                              if (!inline && match) {
+                                return (
+                                  <div className="relative group my-4">
+                                    <div className="absolute right-2 top-2 z-10">
+                                      <button
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(codeContent);
+                                          // Simple feedback could be added here if needed, 
+                                          // but opacity change on hover already gives feedback
+                                        }}
+                                        className="p-1.5 rounded-md bg-ter/80 border border-col text-sec hover:text-primary-400 hover:border-primary-500/50 transition-all opacity-0 group-hover:opacity-100"
+                                        title="Copy Code"
+                                      >
+                                        <Copy className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
+                                    <pre className={`${className} !m-0 !bg-black/40 custom-scrollbar`}>
+                                      <code className="!p-0" {...props}>
+                                        {children}
+                                      </code>
+                                    </pre>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                          }}
+                        >
+                          {m.content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
